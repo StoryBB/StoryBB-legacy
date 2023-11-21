@@ -280,6 +280,8 @@ function sbb_main()
 		'xmlhttp' => ['Xml.php', 'XMLhttpMain'],
 	];
 
+	(new Mutatable\Legacy\ActionList($actionArray))->execute();
+
 	// Get the function and file to include - if it's not there, do the board index.
 	if (!isset($actionArray[$_REQUEST['action']]))
 	{

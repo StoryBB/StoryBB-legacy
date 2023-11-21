@@ -16,6 +16,7 @@ use StoryBB\Container;
 use StoryBB\Helper\Bbcode\AbstractParser;
 use StoryBB\Helper\Parser;
 use StoryBB\StringLibrary;
+use StoryBB\Hook\Observable;
 
 /**
  * !!!Compatibility!!!
@@ -1743,4 +1744,6 @@ function create_control_richedit($editorOptions)
 
 	// Set a flag so the sub template knows what to do...
 	$context['show_bbc'] = !empty($modSettings['enableBBC']);
+
+	(new Observable\Editor\Initialised($editorOptions['id']))->execute();
 }

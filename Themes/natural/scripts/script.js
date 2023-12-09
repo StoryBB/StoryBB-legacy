@@ -940,7 +940,7 @@ JumpTo.prototype.fillSelect = function (aBoardsAndCategories)
 			if (aBoardsAndCategories[i].isCategory)
 				oOption.disabled = 'disabled';
 			else
-				oOption.value = aBoardsAndCategories[i].aBoardsAndCategories[i].url;
+				oOption.value = aBoardsAndCategories[i].id;
 		}
 		oListFragment.appendChild(oOption);
 

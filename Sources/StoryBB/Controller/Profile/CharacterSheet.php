@@ -570,7 +570,7 @@ class CharacterSheet extends AbstractProfileController
 			{
 				var template = sheet_templates[tmpl].body;
 				var char_name = ' . json_encode(html_entity_decode($context['character']['character_name'], ENT_QUOTES)) . ';
-				template = template.replace("{$character_name}", char_name);
+				template = template.replaceAll("{$character_name}", char_name);
 				$("#message").data("sceditor").InsertText(template);
 			}
 		});', true);

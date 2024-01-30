@@ -298,7 +298,8 @@ function resizeImageFile($source, $destination, $max_width, $max_height, $prefer
 		'2' => 'jpeg',
 		'3' => 'png',
 		'6' => 'bmp',
-		'15' => 'wbmp'
+		'15' => 'wbmp',
+		'18' => 'webp',
 	];
 
 	require_once($sourcedir . '/Subs-Package.php');

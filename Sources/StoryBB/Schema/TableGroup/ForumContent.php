@@ -98,6 +98,7 @@ class ForumContent
 					'id_creator' => Column::mediumint(),
 					'id_member' => Column::mediumint(),
 					'id_character' => Column::int(),
+					'id_avatar_attach' => Column::int(),
 					'id_msg_modified' => Column::int(),
 					'subject' => Column::varchar(255),
 					'poster_name' => Column::varchar(255),

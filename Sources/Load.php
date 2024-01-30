@@ -1035,10 +1035,13 @@ function loadMemberData($users, $is_name = false, $set = 'normal')
 		$request = $smcFunc['db']->query('', '
 			SELECT chars.id_member, chars.id_character, chars.character_name, 
 				a.filename, COALESCE(a.id_attach, 0) AS id_attach, chars.avatar, chars.signature, chars.id_theme,
-				chars.posts, chars.date_created, chars.last_active, chars.is_main,
-				chars.main_char_group, chars.char_groups, chars.char_sheet, chars.retired
+				chars.posts, chars.date_created, chars.last_active, chars.is_main, chars.rotate_avatar,
+				chars.main_char_group, chars.char_groups, chars.char_sheet, chars.retired,
+				additional_a.filename AS add_filename, COALESCE(additional_a.id_attach, 0) AS add_id_attach, additional_a.attachment_type AS add_attach_type,
+				additional_a.label AS add_label
 			FROM {db_prefix}characters AS chars
 			LEFT JOIN {db_prefix}attachments AS a ON (chars.id_character = a.id_character AND a.attachment_type = 1)
+			LEFT JOIN {db_prefix}attachments AS additional_a ON (chars.id_character = additional_a.id_character AND (additional_a.attachment_type = 5 OR additional_a.attachment_type = 6))
 			WHERE id_member IN ({array_int:loaded_ids})
 			ORDER BY NULL',
 			[
@@ -1052,26 +1055,31 @@ function loadMemberData($users, $is_name = false, $set = 'normal')
 			if ($image_proxy_enabled && !empty($row['avatar']) && stripos($row['avatar'], 'http://') !== false)
 				$row['avatar'] = $boardurl . '/proxy.php?request=' . urlencode($row['avatar']) . '&hash=' . md5($row['avatar'] . $image_proxy_secret);
 
-			$user_profile[$row['id_member']]['characters'][$row['id_character']] = [
-				'id_character' => $row['id_character'],
-				'character_name' => $row['character_name'],
-				'character_url' => '?action=profile;u=' . $row['id_member'] . ';area=characters;char=' . $row['id_character'],
-				'avatar' => $row['avatar'],
-				'avatar_filename' => $row['filename'],
-				'id_attach' => $row['id_attach'],
-				'avatar_original' => $row['avatar_original'],
-				'signature' => $row['signature'],
-				'sig_parsed' => !empty($row['signature']) ? Parser::parse_bbc($row['signature'], true, 'sig_char_' . $row['id_character']) : '',
-				'id_theme' => $row['id_theme'],
-				'posts' => $row['posts'],
-				'date_created' => $row['date_created'],
-				'last_active' => $row['last_active'],
-				'is_main' => $row['is_main'],
-				'main_char_group' => $row['main_char_group'],
-				'char_groups' => $row['char_groups'],
-				'char_sheet' => $row['char_sheet'],
-				'retired' => $row['retired'],
-			];
+			if (!isset($user_profile[$row['id_member']]['characters'][$row['id_character']]))
+			{
+				$user_profile[$row['id_member']]['characters'][$row['id_character']] = [
+					'id_character' => $row['id_character'],
+					'character_name' => $row['character_name'],
+					'character_url' => '?action=profile;u=' . $row['id_member'] . ';area=characters;char=' . $row['id_character'],
+					'avatar' => $row['avatar'],
+					'avatar_filename' => $row['filename'],
+					'id_attach' => $row['id_attach'],
+					'avatar_original' => $row['avatar_original'],
+					'additional_avatars' => [],
+					'signature' => $row['signature'],
+					'sig_parsed' => !empty($row['signature']) ? Parser::parse_bbc($row['signature'], true, 'sig_char_' . $row['id_character']) : '',
+					'id_theme' => $row['id_theme'],
+					'posts' => $row['posts'],
+					'date_created' => $row['date_created'],
+					'last_active' => $row['last_active'],
+					'is_main' => $row['is_main'],
+					'rotate_avatar' => $row['rotate_avatar'],
+					'main_char_group' => $row['main_char_group'],
+					'char_groups' => $row['char_groups'],
+					'char_sheet' => $row['char_sheet'],
+					'retired' => $row['retired'],
+				];
+			}
 			if ($row['is_main'])
 			{
 				$user_profile[$row['id_member']]['main_char'] = $row['id_character'];
@@ -1083,6 +1091,40 @@ function loadMemberData($users, $is_name = false, $set = 'normal')
 				$user_profile[$row['id_member']]['id_attach'] = $row['id_attach'];
 			}
 			$image = '';
+
+			// We have some additional avatars?
+			if (!empty($row['add_attach_type']))
+			{
+				if ($row['add_attach_type'] == 5)
+				{
+					$user_profile[$row['id_member']]['characters'][$row['id_character']]['additional_avatars'][$row['add_id_attach']] = [
+						'id_attach' => $row['add_id_attach'],
+						'avatar_filename' => $row['add_filename'],
+						'label' => $row['add_label'],
+						'avatar' => set_avatar_data([
+							'filename' => $row['add_filename'],
+						])['href'],
+						'type' => $row['add_attach_type'],
+					];
+				}
+				elseif ($row['add_attach_type'] == 6)
+				{
+					$row['additional_row_original'] = !empty($row['add_filename']) ? $row['add_filename'] : '';
+					if ($image_proxy_enabled && !empty($row['add_filename']) && stripos($row['avatar'], 'http://') !== false)
+					{
+						$row['add_filename'] = $boardurl . '/proxy.php?request=' . urlencode($row['add_filename']) . '&hash=' . md5($row['add_filename'] . $image_proxy_secret);
+					}
+					$user_profile[$row['id_member']]['characters'][$row['id_character']]['additional_avatars'][$row['add_id_attach']] = [
+						'additional_row_original' => $row['additional_row_original'],
+						'add_filename' => $row['add_filename'],
+						'label' => $row['add_label'],
+						'avatar' => set_avatar_data([
+							'avatar' => $row['add_filename'],
+						])['href'],
+						'type' => $row['add_attach_type'],
+					];
+				}
+			}
 
 			$characters_loaded[$row['id_character']] = $row['id_member'];
 

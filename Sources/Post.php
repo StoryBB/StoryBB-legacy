@@ -397,6 +397,7 @@ function Post($post_errors = [])
 	// Do we have a body, but an error happened.
 	if (isset($_REQUEST['message']) || isset($_REQUEST['quickReply']) || !empty($context['post_error']))
 	{
+		$context['selected_avatar'] = (int) ($_REQUEST['avatar_selector'] ?? '');
 		if (isset($_REQUEST['quickReply']))
 			$_REQUEST['message'] = $_REQUEST['quickReply'];
 
@@ -526,8 +527,8 @@ function Post($post_errors = [])
 			// Get the existing message. Previewing.
 			$request = $smcFunc['db']->query('', '
 				SELECT
-					m.id_member, m.modified_time, m.smileys_enabled, m.body,
-					m.poster_name, m.poster_email, m.subject, m.approved,
+					m.id_member, m.id_character, m.modified_time, m.smileys_enabled, m.body,
+					m.poster_name, m.poster_email, m.subject, m.approved, m.id_avatar_attach,
 					COALESCE(a.size, -1) AS filesize, a.filename, a.id_attach,
 					a.approved AS attachment_approved, t.id_member_started AS id_member_poster,
 					m.poster_time
@@ -552,6 +553,8 @@ function Post($post_errors = [])
 			while ($row2 = $smcFunc['db']->fetch_assoc($request))
 				$attachment_stuff[] = $row2;
 			$smcFunc['db']->free_result($request);
+
+			$context['avatar_choices'] = get_avatar_choices($row['id_member'], $row['id_character']);
 
 			if ($row['id_member'] == $user_info['id'] && !allowedTo('modify_any'))
 			{
@@ -636,8 +639,8 @@ function Post($post_errors = [])
 		// Get the existing message. Editing.
 		$request = $smcFunc['db']->query('', '
 			SELECT
-				m.id_member, m.modified_time, m.modified_name, m.modified_reason, m.smileys_enabled, m.body,
-				m.poster_name, m.poster_email, m.subject, m.approved,
+				m.id_member, m.id_character, m.modified_time, m.modified_name, m.modified_reason, m.smileys_enabled, m.body,
+				m.poster_name, m.poster_email, m.subject, m.approved, m.id_avatar_attach,
 				COALESCE(a.size, -1) AS filesize, a.filename, a.id_attach, a.mime_type, a.id_thumb,
 				a.approved AS attachment_approved, t.id_member_started AS id_member_poster,
 				m.poster_time
@@ -656,6 +659,8 @@ function Post($post_errors = [])
 		if ($smcFunc['db']->num_rows($request) == 0)
 			fatal_lang_error('no_message', false);
 		$row = $smcFunc['db']->fetch_assoc($request);
+
+		$context['avatar_choices'] = get_avatar_choices($row['id_member'], $row['id_character']);
 
 		$attachment_stuff = [$row];
 		while ($row2 = $smcFunc['db']->fetch_assoc($request))
@@ -731,12 +736,16 @@ function Post($post_errors = [])
 		// Set the destination.
 		$context['destination'] = 'post2;start=' . $_REQUEST['start'] . ';msg=' . $_REQUEST['msg'] . ';' . $context['session_var'] . '=' . $context['session_id'] . (isset($_REQUEST['poll']) ? ';poll' : '');
 		$context['submit_label'] = $txt['save'];
+
+		$context['selected_avatar'] = $row['id_avatar_attach'];
 	}
 	// Posting...
 	else
 	{
 		// By default....
 		$context['use_smileys'] = true;
+		$context['selected_avatar'] = (int) ($_REQUEST['avatar_selector'] ?? '');
+		$context['avatar_choices'] = get_avatar_choices();
 
 		if ($user_info['is_guest'])
 		{
@@ -1539,7 +1548,7 @@ function Post2()
 		}
 
 		$request = $smcFunc['db']->query('', '
-			SELECT id_member, poster_name, poster_email, poster_time, approved
+			SELECT id_member, id_character, poster_name, poster_email, poster_time, approved
 			FROM {db_prefix}messages
 			WHERE id_msg = {int:id_msg}
 			LIMIT 1',
@@ -1549,7 +1558,7 @@ function Post2()
 		);
 		if ($smcFunc['db']->num_rows($request) == 0)
 			fatal_lang_error('cant_find_messages', false);
-		$row = $smcFunc['db']->fetch_assoc($request);
+		$existing_msg = $row = $smcFunc['db']->fetch_assoc($request);
 		$smcFunc['db']->free_result($request);
 
 		if (!empty($topic_info['locked']) && !allowedTo('moderate_board'))
@@ -2125,11 +2134,21 @@ function Post2()
 		if (empty($approve_has_changed))
 			unset($msgOptions['approved']);
 
+		$possible_avatars = get_avatar_choices($existing_msg['id_member'], $existing_msg['id_character']);
+		$avatar_id = !empty($_POST['avatar_selector']) && !empty($possible_avatars[$_POST['avatar_selector']]) ? (int) $_POST['avatar_selector'] : 0;
+
+		$msgOptions['id_avatar_attach'] = $avatar_id;
+
 		modifyPost($msgOptions, $topicOptions, $posterOptions);
 	}
 	// This is a new topic or an already existing one. Save it.
 	else
 	{
+		$possible_avatars = get_avatar_choices();
+		$avatar_id = !empty($_POST['avatar_selector']) && !empty($possible_avatars[$_POST['avatar_selector']]) ? (int) $_POST['avatar_selector'] : 0;
+
+		$msgOptions['id_avatar_attach'] = $avatar_id;
+
 		createPost($msgOptions, $topicOptions, $posterOptions);
 
 		if (isset($topicOptions['id']))

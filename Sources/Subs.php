@@ -404,7 +404,7 @@ function updateCharacterData($char_id, $data)
 	foreach ($data as $var => $val)
 	{
 		$type = 'string';
-		if (in_array($var, ['id_theme', 'posts', 'last_active', 'retired']))
+		if (in_array($var, ['id_theme', 'posts', 'last_active', 'retired', 'rotate_avatar']))
 			$type = 'int';
 
 		// Doing an increment?
@@ -2743,4 +2743,51 @@ function httpsOn()
 	$container = Container::instance();
 	$request = $container->get('requestvars');
 	return $request->isSecure();
+}
+
+function get_avatar_choices($user_id = null, $character_id = null) {
+	global $user_info, $context, $memberContext, $txt;
+
+	$avatar_choices = [];
+
+	if (empty($user_id))
+	{
+		$user_id = $user_info['id'];
+	}
+
+	if (empty($character_id))
+	{
+		$character_id = $user_info['id_character'];
+	}
+
+	if (empty($character_id))
+	{
+		return $avatar_choices;
+	}
+
+	loadMemberData($user_id);
+	loadMemberContext($user_id);
+
+	if (!empty($memberContext[$user_id]['characters'][$character_id]))
+	{
+		$current_char = $memberContext[$user_id]['characters'][$character_id];
+		$avatar_choices[0] = [
+			'label' => $txt['default_avatar'],
+			'url' => $current_char['avatar'],
+			'name' => $current_char['character_name'],
+		];
+
+		if (empty($current_char['rotate_avatar']) && !empty($current_char['additional_avatars']))
+		{
+			foreach ($current_char['additional_avatars'] as $id_avatar => $avatar)
+			{
+				$avatar_choices[$id_avatar] = [
+					'label' => $avatar['label'],
+					'url' => $avatar['avatar'],
+				];
+			}
+		}
+	}
+
+	return $avatar_choices;
 }

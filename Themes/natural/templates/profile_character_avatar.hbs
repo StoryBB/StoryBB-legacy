@@ -1,0 +1,200 @@
+	{{! Editing a character }}
+	<div class="cat_bar profile">
+		<h3 class="catbg">{{{context.character.character_name}}} - {{{txt.avatars}}}</h3>
+	</div>
+
+	<div id="profileview" class="roundframe flow_auto">
+		<div class="errorbox" id="profile_error"{{#unless context.form_errors}} style="display:none"{{/unless}}>
+			<span>{{{txt.char_editing_error}}}</span>
+			<ul id="list_errors">
+				{{#each context.form_errors}}
+				<li>{{{.}}}</li>
+				{{/each}}
+			</ul>
+		</div>
+		<div id="basicinfo"></div>
+		<div id="detailedinfo">
+			<form id="creator" action="{{scripturl}}?action=profile;u={{context.id_member}};area=characters;char={{context.character.id_character}};sa=avatar" method="post" accept-charset="UTF-8" enctype="multipart/form-data">
+
+				<dl>
+					<dt>
+						<strong>{{{ txt.rotate_avatar }}}</strong>
+					</dt>
+					<dd>
+						<div>
+							<label>
+								<input type="radio" {{#if (eq context.character.rotate_avatar '1')}} checked{{/if}} value="1" name="rotate_avatar"> {{{ txt.rotate_avatar_yes }}} 
+							</label>
+						</div>
+						<div>
+							<label>
+								<input type="radio" {{#if (eq context.character.rotate_avatar '0')}} checked{{/if}} value="0" name="rotate_avatar"> {{{ txt.rotate_avatar_no }}} 
+							</label>
+						</div>
+					</dd>
+				</dl>
+
+				<dl>
+					<dt>
+						<strong id="personal_picture">
+							<label for="avatar_upload_box">{{{txt.main_avatar}}}</label>
+						</strong>
+						<input type="radio" onclick="swap_avatar(this); return true;" name="avatar_choice" id="avatar_choice_none" value="none"{{#if (eq context.character.avatar_settings.choice 'none')}} checked{{/if}} />
+						<label for="avatar_choice_none"{{#if context.form_errors.bad_avatar}} class="error"{{/if}}>{{{txt.no_avatar}}}</label>
+						<br />
+
+{{#if context.character.avatar_settings.allow_external}}
+						<input type="radio" onclick="swap_avatar(this); return true;" name="avatar_choice" id="avatar_choice_external" value="external"{{#if (eq context.character.avatar_settings.choice 'external')}} checked{{/if}} />
+						<label for="avatar_choice_external"{{#if context.form_errors.bad_avatar}} class="error"{{/if}}>{{{txt.my_own_pic}}}</label>
+						<br />
+{{/if}}
+
+{{#if context.character.avatar_settings.allow_upload}}
+						<input type="radio" onclick="swap_avatar(this); return true;" name="avatar_choice" id="avatar_choice_upload" value="upload"{{#if (eq context.character.avatar_settings.choice 'upload')}} checked{{/if}} />
+						<label for="avatar_choice_upload"{{#if context.form_errors.bad_avatar}} class="error"{{/if}}>{{{txt.avatar_will_upload}}}</label>
+						<br />
+{{/if}}
+
+					</dt>
+					<dd>
+						<div>
+							<div><img style="display:none" id="avatar" src="{{#if context.character.avatar}}{{{context.character.avatar}}}{{else}}{{settings.images_url}}/blank.png{{/if}}" alt="Do Nothing"></div>
+							<script>
+								var avatar = document.getElementById("avatar");
+								var maxHeight = {{modSettings.avatar_max_height}};
+								var maxWidth = {{modSettings.avatar_max_width}};
+
+								previewExternalAvatar(avatar.src)
+
+							</script>
+						</div>
+
+{{! If the user can link to an off server avatar, show them a box to input the address. }}
+{{#if context.character.avatar_settings.allow_external}}
+						<div id="avatar_external">
+							<div class="smalltext">{{{txt.avatar_by_url}}}</div>{{#if (eq modSettings.avatar_action_too_large 'option_download_and_resize')}}{{> max_avatar_size}}{{/if}}
+							<input type="text" name="userpicpersonal" size="45" value="{{#if (eq context.character.avatar_settings.choice 'external')}}{{{context.character.avatar_settings.external}}}{{/if}}" placeholder="https://" onfocus="selectRadioByName(document.forms.creator.avatar_choice, 'external');" onchange="if (typeof(previewExternalAvatar) != 'undefined') previewExternalAvatar(this.value);" />
+							{{#if (eq context.character.avatar_settings 'external')}}<br><img src="{{#if context.character.avatar}}{{{context.character.avatar}}}{{else}}{{settings.images_url}}/blank.png{{/if}}" alt="" id="external_image">{{/if}}
+						</div>
+{{/if}}
+
+{{! If the user is able to upload avatars to the server show them an upload box. }}
+{{#if context.character.avatar_settings.allow_upload}}
+						<div id="avatar_upload">
+							<input type="file" size="44" name="attachment" id="avatar_upload_box" value="" onchange="readfromUpload(this)" onfocus="selectRadioByName(document.forms.creator.avatar_choice, 'upload');" accept="image/gif, image/jpeg, image/jpg, image/png, image/webp">
+							{{> max_avatar_size}}
+							{{#if context.character.id_attach}}<br><img src="{{{context.character.avatar}}}" alt="" id="attached_image"><input type="hidden" name="id_attach" value="{{context.character.id_attach}}">{{/if}}
+						</div>
+{{/if}}
+
+						<script>
+							function swap_avatar(type)
+							{
+								switch(type.id)
+								{
+									case "avatar_choice_external":
+										{{#if context.character.avatar_settings.allow_external}}document.getElementById("avatar_external").style.display = "";{{/if}}
+										{{#if context.character.avatar_settings.allow_upload}}document.getElementById("avatar_upload").style.display = "none";{{/if}}
+										break;
+									case "avatar_choice_upload":
+										{{#if context.character.avatar_settings.allow_external}}document.getElementById("avatar_external").style.display = "none";{{/if}}
+										{{#if context.character.avatar_settings.allow_upload}}document.getElementById("avatar_upload").style.display = "";{{/if}}
+										break;
+									case "avatar_choice_none":
+										{{#if context.character.avatar_settings.allow_external}}document.getElementById("avatar_external").style.display = "none";{{/if}}
+										{{#if context.character.avatar_settings.allow_upload}}document.getElementById("avatar_upload").style.display = "none";{{/if}}
+										break;
+								}
+							}
+							swap_avatar({id: 'avatar_choice_{{{context.character.avatar_settings.choice}}}'});
+
+							function swap_additional_avatar(type, index)
+							{
+								switch(type.value)
+								{
+									case "external":
+										{{#if context.character.avatar_settings.allow_external}}document.getElementById("avatar_external_" + index).style.display = "";{{/if}}
+										{{#if context.character.avatar_settings.allow_upload}}document.getElementById("avatar_upload_" + index).style.display = "none";{{/if}}
+										break;
+									case "upload":
+										{{#if context.character.avatar_settings.allow_external}}document.getElementById("avatar_external_" + index).style.display = "none";{{/if}}
+										{{#if context.character.avatar_settings.allow_upload}}document.getElementById("avatar_upload_" + index).style.display = "";{{/if}}
+										break;
+									case "none":
+										{{#if context.character.avatar_settings.allow_external}}document.getElementById("avatar_external_" + index).style.display = "none";{{/if}}
+										{{#if context.character.avatar_settings.allow_upload}}document.getElementById("avatar_upload_" + index).style.display = "none";{{/if}}
+										break;
+								}
+							}
+						</script>
+					</dd>
+				</dl>
+
+{{#each context.additional_avatars}}
+				<dl>
+					<dt>
+						<strong>
+							<label>{{{this.title}}}</label>
+						</strong><br>
+
+						<input type="radio" onclick="swap_additional_avatar(this, {{ @index }}); return true;" name="additional[{{ @index }}]" id="avatar_choice_none_{{ @index }}" value="none"{{#if (eq this.type 'none')}} checked{{/if}} />
+						<label for="avatar_choice_none_{{ @index }}"{{#if ../context.form_errors.bad_avatar}} class="error"{{/if}}>{{{../txt.no_avatar}}}</label>
+						<br />
+
+	{{#if ../context.character.avatar_settings.allow_external}}
+						<input type="radio" onclick="swap_additional_avatar(this, {{ @index }}); return true;" name="additional[{{ @index }}]" id="avatar_choice_external_{{ @index }}" value="external"{{#if (eq this.type 'external')}} checked{{/if}} />
+						<label for="avatar_choice_external_{{ @index }}"{{#if ../context.form_errors.bad_avatar}} class="error"{{/if}}>{{{../txt.my_own_pic}}}</label>
+						<br />
+	{{/if}}
+
+	{{#if ../context.character.avatar_settings.allow_upload}}
+						<input type="radio" onclick="swap_additional_avatar(this, {{ @index }}); return true;" name="additional[{{ @index }}]" id="avatar_choice_upload_{{ @index }}" value="upload"{{#if (eq this.type 'upload')}} checked{{/if}} />
+						<label for="avatar_choice_upload_{{ @index }}"{{#if ../context.form_errors.bad_avatar}} class="error"{{/if}}>{{{../txt.avatar_will_upload}}}</label>
+						<br />
+	{{/if}}
+
+					</dt>
+					<dd>
+						<div>
+							<div><img style="display:none" id="avatar_{{ @index }}" src="{{#if this.preview}}{{{this.preview}}}{{else}}{{../settings.images_url}}/blank.png{{/if}}" alt="Do Nothing"></div>
+						</div>
+
+	{{! If the user can link to an off server avatar, show them a box to input the address. }}
+	{{#if ../context.character.avatar_settings.allow_external}}
+						<div id="avatar_external_{{ @index }}">
+							<input type="text" size="44" name="additional_label_external[{{ @index }}]" value="{{{ this.label }}}">
+							<div class="smalltext">{{{../txt.avatar_by_url}}}</div>{{#if (eq ../modSettings.avatar_action_too_large 'option_download_and_resize')}}{{> max_avatar_size modSettings=../modSettings txt=../txt}}{{/if}}
+							<input type="text" id="avatar_external_src_{{ @index }}" name="additional_url[{{ @index }}]" size="45" value="{{#if (eq this.type 'external')}}{{{this.url}}}{{/if}}" placeholder="https://" onchange="if (typeof(previewExternalAdditionalAvatar) != 'undefined') previewExternalAdditionalAvatar(this.value, {{ @index }});" />
+							{{#if (and (eq this.type 'external') this.id)}}<br><img src="{{{this.preview}}}" alt="" id="external_image_{{ @index }}">{{/if}}
+						</div>
+
+						<script>
+							previewExternalAdditionalAvatar(document.getElementById("avatar_external_src_{{ @index }}").value, {{ @index }});
+						</script>
+	{{/if}}
+
+	{{! If the user is able to upload avatars to the server show them an upload box. }}
+	{{#if ../context.character.avatar_settings.allow_upload}}
+						<div id="avatar_upload_{{ @index }}">
+							<input type="text" size="44" name="additional_label_upload[{{ @index }}]" value="{{{ this.label }}}">
+							<input type="file" size="44" name="additional_upload_{{ @index }}" id="avatar_upload_box_{{ @index }}" value="" onchange="readAdditionalFromUpload(this, {{ @index }})" accept="image/gif, image/jpeg, image/jpg, image/png, image/webp">
+							{{> max_avatar_size modSettings=../modSettings txt=../txt}}
+							{{#if (and (eq this.type 'upload') this.id)}}<br><img src="{{{this.preview}}}" alt="" id="attached_image_{{ @index }}">{{/if}}
+						</div>
+
+		{{# if this.id}}
+						<input type="hidden" name="additional_id[{{ @index }}]" value="{{this.id}}">
+		{{/if}}
+	{{/if}}
+					</dd>
+				</dl>
+				<script>swap_additional_avatar({value: '{{ this.type }}'}, {{ @index }});</script>
+{{/each}}
+
+				<input type="hidden" name="u" value="{{context.id_member}}" />
+				<input type="submit" name="edit_char" value="{{{txt.save_changes}}}" />
+				{{session_form}}
+				{{token_form (concat 'edit-char' context.character.id_character)}}
+			</form>
+		</div>
+	</div>

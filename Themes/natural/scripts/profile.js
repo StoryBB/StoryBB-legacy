@@ -231,25 +231,70 @@ function showAvatar()
 	document.getElementById("avatar").style.height = "";
 }
 
+function isValidUrl(src) {
+	if (!URL.canParse(src)) {
+		return false;
+	}
+	const srcURL = new URL(src);
+	if (srcURL.protocol != 'https:' && srcURL.protocol != 'http:') {
+		return false;
+	}
+
+	return true;
+}
+
 function previewExternalAvatar(src)
 {
-	if (!document.getElementById("avatar"))
+	if (!src)
 		return;
 
-	var tempImage = new Image();
+	// If there is an image already, hide it...
+	$('#external_image, #external_image_new').remove();
 
-	tempImage.src = src;
-	if (maxWidth != 0 && tempImage.width > maxWidth)
-	{
-		document.getElementById("avatar").style.height = parseInt((maxWidth * tempImage.height) / tempImage.width) + "px";
-		document.getElementById("avatar").style.width = maxWidth + "px";
+	if (!isValidUrl(src)) {
+		return;
 	}
-	else if (maxHeight != 0 && tempImage.height > maxHeight)
-	{
-		document.getElementById("avatar").style.width = parseInt((maxHeight * tempImage.width) / tempImage.height) + "px";
-		document.getElementById("avatar").style.height = maxHeight + "px";
+
+	var externalImage = $('<img />', {
+		id: 'external_image_new',
+		src: src,
+	});
+
+	if (maxWidth > 0) {
+		externalImage.css('max-width', maxWidth + 'px');
 	}
-	document.getElementById("avatar").src = src;
+	if (maxHeight > 0) {
+		externalImage.css('max-height', maxHeight + 'px');
+	}
+	externalImage.appendTo($('#avatar_external'));
+}
+
+function previewExternalAdditionalAvatar(src, index)
+{
+	if (!src) {
+		return;
+	}
+
+	// If there is an image already, hide it...
+	$('#external_image_' + index + ', #external_image_new_' + index).remove();
+
+	if (!isValidUrl(src)) {
+		return;
+	}
+
+	var uploadedImage = $('<img />', {
+		id: 'external_image_new_' + index,
+		src: src,
+	});
+
+	if (maxWidth > 0) {
+		uploadedImage.css('max-width', maxWidth + 'px');
+	}
+	if (maxHeight > 0) {
+		uploadedImage.css('max-height', maxHeight + 'px');
+	}
+
+	uploadedImage.appendTo($('#avatar_external_' + index));
 }
 
 function readfromUpload(input) {
@@ -273,22 +318,53 @@ function readfromUpload(input) {
 			var uploadedImage = $('<img />', {
 				id: 'attached_image_new',
 				src: e.target.result,
-				image: tempImage.width,
-				height: tempImage.height,
 			});
 
-			if (maxWidth != 0 && uploadedImage.width() > maxWidth)
-			{
-				uploadedImage.height(parseInt((maxWidth * uploadedImage.height()) / uploadedImage.width()) + "px");
-				uploadedImage.width(maxWidth + "px");
+			if (maxWidth && maxWidth > 0) {
+				uploadedImage.css('max-width', maxWidth + 'px');
 			}
-			else if (maxHeight != 0 && uploadedImage.height() > maxHeight)
-			{
-				uploadedImage.width(parseInt((maxHeight * uploadedImage.width) / uploadedImage.height) + "px");
-				uploadedImage.height(maxHeight + "px");
+			if (maxHeight && maxHeight > 0) {
+				uploadedImage.css('max-height', maxHeight + 'px');
 			}
 
 			uploadedImage.appendTo($('#avatar_upload'));
+		}
+
+		reader.readAsDataURL(input.files[0]);
+	}
+}
+
+function readAdditionalFromUpload(input, index) {
+	if (input.files && input.files[0]) {
+		var reader = new FileReader();
+
+		reader.onload = function (e) {
+
+			// If there is an image already, hide it...
+			if ($('#attached_image_' + index).length){
+				$('#attached_image_' + index).remove();
+			}
+
+			if ($('#attached_image_new_' + index).length){
+				$('#attached_image_new_' + index).remove();
+			}
+
+			var tempImage = new Image();
+				tempImage.src = e.target.result;
+
+			var uploadedImage = $('<img />', {
+				id: 'attached_image_new_' + index,
+				src: e.target.result,
+			});
+
+			if (maxWidth > 0) {
+				uploadedImage.css('max-width', maxWidth + 'px');
+			}
+			if (maxHeight > 0) {
+				uploadedImage.css('max-height', maxHeight + 'px');
+			}
+
+			uploadedImage.appendTo($('#avatar_upload_' + index));
 		}
 
 		reader.readAsDataURL(input.files[0]);

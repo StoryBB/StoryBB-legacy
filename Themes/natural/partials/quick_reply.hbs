@@ -18,6 +18,14 @@
 					{{#if (and modSettings.show_user_images options.show_avatars)}}
 									<li class="avatar">
 										<img class="avatar" src="{{#if context.current_avatar}}{{{context.current_avatar}}}{{else}}{{settings.images_url}}/default.png{{/if}}">
+
+						{{#if (gt (count context.avatar_choices) 1)}}
+										<select name="avatar_selector" id="avatar_selector">
+							{{#each context.avatar_choices}}
+											<option value="{{ @index }}" data-url="{{{ url }}}">{{{ label }}}</option>
+							{{/each}}
+										</select>
+						{{/if}}
 									</li>
 					{{/if}}
 					{{#if context.current_groups.badges}}
@@ -132,3 +140,11 @@
 				var oEditorObject = oEditorHandle_{{context.post_box_name}};
 				var oJumpAnchor = "quickreply";
 			</script>
+
+{{#if context.avatar_choices}}
+			<script>
+				$('#avatar_selector').on('change', function() {
+					$(this).closest('li').find('img').attr('src', $(this).find('option[value=' + $(this).val() + ']').data('url'));
+				})
+			</script>
+{{/if}}

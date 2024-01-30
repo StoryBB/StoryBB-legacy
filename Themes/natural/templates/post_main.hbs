@@ -137,42 +137,69 @@
 			</div>
 {{/if}}
 
-			{{{richtexteditor context.post_box_name 'smileyBox_message' 'bbcBox_message'}}}
+{{#if context.avatar_choices}}
+			<div class="post_wrapper">
+				<div class="poster">
+					<h4>{{{ context.avatar_choices.0.name }}}</h4>
+					<div class="user_info_arrow"></div>
+					<ul class="user_info">
+						<li class="avatar">
+
+
+							<img class="avatar" src="{{{ context.avatar_choices.0.url }}}">
+	{{#if (gt (count context.avatar_choices) 1)}}
+							<select name="avatar_selector" id="avatar_selector">
+		{{#each context.avatar_choices}}
+								<option value="{{ @index }}" {{#if (eq_coerce ../context.selected_avatar @index)}} selected {{/if}} data-url="{{{ url }}}">{{{ label }}}</option>
+		{{/each}}
+							</select>
+	{{/if}}
+						</li>
+					</ul>
+				</div>
+				<div class="postarea">
+{{/if}}
+					{{{richtexteditor context.post_box_name 'smileyBox_message' 'bbcBox_message'}}}
 
 {{#if (and context.editing modSettings.show_modify)}}
-			<dl>
-				<dt class="clear">
-					<span id="caption_edit_reason">{{txt.reason_for_edit}}:</span>
-				</dt>
-				<dd>
-					<input type="text" name="modify_reason"{{#if context.last_modified_reason}} value="{{{context.last_modified_reason}}}"{{/if}} size="80" maxlength="80">
-				</dd>
-			</dl>
+					<dl>
+						<dt class="clear">
+							<span id="caption_edit_reason">{{txt.reason_for_edit}}:</span>
+						</dt>
+						<dd>
+							<input type="text" name="modify_reason"{{#if context.last_modified_reason}} value="{{{context.last_modified_reason}}}"{{/if}} size="80" maxlength="80">
+						</dd>
+					</dl>
 {{/if}}
 
 {{#if context.last_modified}}
-			<div class="padding smalltext">
-				{{context.last_modified_text}}
-			</div>
+					<div class="padding smalltext">
+						{{context.last_modified_text}}
+					</div>
 {{/if}}
 
 {{#if context.invites}}
-			<dl class="topic-invites settings">
-				<dt class="clear">
+					<dl class="topic-invites settings">
+						<dt class="clear">
 	{{#if context.can_invite}}
-					{{{txt.invite_character}}}
-					<select name="invite[]" id="invite_character" multiple></select>
+							{{{txt.invite_character}}}
+							<select name="invite[]" id="invite_character" multiple></select>
 	{{/if}}
-				</dt>
+						</dt>
 	{{#if context.already_invited}}
-				<dd class="invites">
-					{{{txt.already_invited}}}
+						<dd class="invites">
+							{{{txt.already_invited}}}
 		{{#each context.already_invited}}
-			{{{avatar.image}}}
+							{{{avatar.image}}}
 		{{/each}}
-				</dd>
+						</dd>
 	{{/if}}
-			</dl>
+					</dl>
+{{/if}}
+
+{{#if context.avatar_choices}}
+				</div>
+			</div>
 {{/if}}
 
 {{#if modSettings.additional_options_collapsable}}
@@ -746,5 +773,17 @@
 				setOuterHTML(document.getElementById('pollMoreOptions'), '{{jsEscape '<dt><label for="options-'}}' + pollOptionId + '{{jsEscape (concat '">'  txt.option)}}' + pollOptionNum + '{{jsEscape '</label>:</dt><dd><input type="text" name="options['}}' + pollOptionId + '{{jsEscape ']" id="options-'}}' + pollOptionId + '{{jsEscape '" value="" size="80" maxlength="255" tabindex="'}}' + pollTabIndex + '{{jsEscape '"></dd><p id="pollMoreOptions"></p>'}}');
 			};
 	{{/if}}
+	</script>
+{{/if}}
+
+{{#if context.avatar_choices}}
+	<script>
+		function updateAvatar() {
+			$('#avatar_selector').closest('li').find('img').attr('src', $('#avatar_selector').find('option[value=' + $('#avatar_selector').val() + ']').data('url'));
+		}
+		$('#avatar_selector').on('change', function() {
+			updateAvatar();
+		});
+		updateAvatar();
 	</script>
 {{/if}}

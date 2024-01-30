@@ -1942,21 +1942,94 @@ img.smiley {
 #post_header {
 	padding: 6px;
 	overflow: hidden;
+
+	display: flex;
+	flex-flow: row;
 }
 
 #post_header dt {
-	float: left;
 	padding: 0;
-	width: 15%;
+	min-width: calc(60px +  #{$avatar_max_width}px);
 	margin: 6px 0 0 0;
 	font-weight: bold;
+	flex: 0;
 }
 
 #post_header dd {
-	float: left;
 	padding: 0;
-	width: 83%;
 	margin: 4px 0;
+	flex: 1;
+
+	&.pf_subject {
+		display: flex;
+		align-items: center;
+
+		.select2-selection {
+			border-radius: 0;
+			margin-top: -1px;
+
+			input {
+				padding: 4px 0 5px 0;
+			}
+		}
+	}
+}
+
+.poster select {
+	min-width: #{$avatar_max_width}px;
+}
+
+@media screen and (min-width: 768px) {
+	#post_header + .post_wrapper .postarea::before {
+		content: "";
+		display: block;
+		height: 35px;
+	}
+}
+
+@media screen and (max-width: 767px) {
+	#post_header {
+		flex-direction: column;
+
+		.pf_subject {
+			align-items: flex-start !important;
+			flex-direction: column;
+		}
+	}
+
+	#post_header + .post_wrapper {
+		.poster {
+			width: auto;
+			position: relative;
+
+			h4 {
+				position: absolute;
+				left: 65px;
+				top: 25px;
+				line-height: 50px;
+			}
+
+			.user_info li {
+				text-align: left;
+				width: auto;
+				padding: 0 10px;
+
+				#avatar_selector {
+					display: block;
+					width: 100%;
+				}
+			}
+		}
+		.postarea {
+			width: auto;
+		}
+		flex-direction: column;
+
+		img {
+			max-width: 50px;
+			max-height: 50px;
+		}
+	}
 }
 
 #post_header img {

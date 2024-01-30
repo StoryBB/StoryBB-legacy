@@ -43,6 +43,7 @@ class Post
 		$msgOptions['smileys_enabled'] = !empty($msgOptions['smileys_enabled']);
 		$msgOptions['attachments'] = empty($msgOptions['attachments']) ? [] : $msgOptions['attachments'];
 		$msgOptions['approved'] = isset($msgOptions['approved']) ? (int) $msgOptions['approved'] : 1;
+		$msgOptions['id_avatar_attach'] = isset($msgOptions['id_avatar_attach']) ? (int) $msgOptions['id_avatar_attach'] : 0;
 		$topicOptions['id'] = empty($topicOptions['id']) ? 0 : (int) $topicOptions['id'];
 		$topicOptions['poll'] = isset($topicOptions['poll']) ? (int) $topicOptions['poll'] : null;
 		$topicOptions['lock_mode'] = isset($topicOptions['lock_mode']) ? $topicOptions['lock_mode'] : null;
@@ -127,13 +128,13 @@ class Post
 		$message_columns = [
 			'id_board' => 'int', 'id_topic' => 'int', 'id_creator' => 'int', 'id_member' => 'int', 'id_character' => 'int', 'subject' => 'string-255', 'body' => (!empty($modSettings['max_messageLength']) && $modSettings['max_messageLength'] > 65534 ? 'string-' . $modSettings['max_messageLength'] : (empty($modSettings['max_messageLength']) ? 'string' : 'string-65534')),
 			'poster_name' => 'string-255', 'poster_email' => 'string-255', 'poster_time' => 'int', 'poster_ip' => 'inet',
-			'smileys_enabled' => 'int', 'modified_name' => 'string', 'approved' => 'int',
+			'smileys_enabled' => 'int', 'modified_name' => 'string', 'approved' => 'int', 'id_avatar_attach' => 'int',
 		];
 
 		$message_parameters = [
 			$topicOptions['board'], $topicOptions['id'], $posterOptions['id'], $posterOptions['id'], $posterOptions['char_id'], $msgOptions['subject'], $msgOptions['body'],
 			$posterOptions['name'], $posterOptions['email'], time(), $posterOptions['ip'],
-			$msgOptions['smileys_enabled'] ? 1 : 0, '', $msgOptions['approved'],
+			$msgOptions['smileys_enabled'] ? 1 : 0, '', $msgOptions['approved'], $msgOptions['id_avatar_attach'],
 		];
 
 		// What if we want to do anything with posts?
@@ -485,6 +486,10 @@ class Post
 		}
 		if (isset($msgOptions['smileys_enabled']))
 			$messages_columns['smileys_enabled'] = empty($msgOptions['smileys_enabled']) ? 0 : 1;
+		if (isset($msgOptions['id_avatar_attach']))
+		{
+			$messages_columns['id_avatar_attach'] = (int) $msgOptions['id_avatar_attach'];
+		}
 
 		// Which columns need to be ints?
 		$messageInts = ['modified_time', 'id_msg_modified', 'smileys_enabled'];

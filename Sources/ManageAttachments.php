@@ -1065,14 +1065,14 @@ function removeAttachments($condition, $query_type = '', $return_affected_messag
 	while ($row = $smcFunc['db']->fetch_assoc($request))
 	{
 		// Figure out the "encrypted" filename and unlink it ;).
-		if ($row['attachment_type'] == 1)
+		if ($row['attachment_type'] == 1 || $row['attachment_type'] == 5)
 		{
 			// if attachment_type = 1, it's... an avatar in a custom avatar directory.
 			// wasn't it obvious? :P
 			// @todo look again at this.
 			@unlink($modSettings['custom_avatar_dir'] . '/' . $row['filename']);
 		}
-		else
+		elseif ($row['attachment_type'] != 6)
 		{
 			$filename = Attachment::get_filename($row['filename'], $row['id_attach'], $row['id_folder'], $row['file_hash']);
 			@unlink($filename);

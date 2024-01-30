@@ -1211,7 +1211,7 @@ function profileSaveAvatarData(&$value)
 		$cur_profile['attachment_type'] = 0;
 		$cur_profile['filename'] = '';
 
-		removeAttachments(['id_character' => $context['character']['id_character']]);
+		removeAttachments(['id_character' => $context['character']['id_character'], 'attachment_type' => 1]);
 	}
 	elseif ($value == 'external' && allowedTo('profile_remote_avatar') && (stripos($_POST['userpicpersonal'], 'http://') === 0 || stripos($_POST['userpicpersonal'], 'https://') === 0) && empty($modSettings['avatar_download_external']))
 	{
@@ -1221,7 +1221,7 @@ function profileSaveAvatarData(&$value)
 		$cur_profile['filename'] = '';
 
 		// Remove any attached avatar...
-		removeAttachments(['id_character' => $context['character']['id_character']]);
+		removeAttachments(['id_character' => $context['character']['id_character'], 'attachment_type' => 1]);
 
 		$profile_vars['avatar'] = str_replace(' ', '%20', preg_replace('~action(?:=|%3d)(?!dlattach)~i', 'action-', $_POST['userpicpersonal']));
 
@@ -1343,7 +1343,8 @@ function profileSaveAvatarData(&$value)
 					'1' => 'gif',
 					'2' => 'jpg',
 					'3' => 'png',
-					'6' => 'bmp'
+					'6' => 'bmp',
+					'18' => 'webp',
 				];
 
 				$extension = isset($extensions[$sizes[2]]) ? $extensions[$sizes[2]] : 'bmp';
@@ -1353,7 +1354,7 @@ function profileSaveAvatarData(&$value)
 				$file_hash = '';
 
 				// Remove previous attachments this member might have had.
-				removeAttachments(['id_character' => $context['character']['id_character']]);
+				removeAttachments(['id_character' => $context['character']['id_character'], 'attachment_type' => 1]);
 
 				$cur_profile['id_attach'] = $smcFunc['db']->insert('',
 					'{db_prefix}attachments',
@@ -1376,7 +1377,7 @@ function profileSaveAvatarData(&$value)
 				if (!rename($_FILES['attachment']['tmp_name'], $destinationPath))
 				{
 					// I guess a man can try.
-					removeAttachments(['id_character' => $memID]);
+					removeAttachments(['id_character' => $context['character']['id_character'], 'attachment_type' => 1]);
 					fatal_lang_error('attach_timeout', 'critical');
 				}
 

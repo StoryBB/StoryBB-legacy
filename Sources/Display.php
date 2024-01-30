@@ -926,7 +926,7 @@ function Display()
 			SELECT
 				id_msg, subject, poster_time, poster_ip, id_member, modified_time, modified_name, modified_reason, body,
 				smileys_enabled, poster_name, poster_email, approved, likes,
-				id_msg_modified < {int:new_from} AS is_read, id_character
+				id_msg_modified < {int:new_from} AS is_read, id_character, id_avatar_attach
 				' . (!empty($msg_selects) ? (', ' . implode(', ', $msg_selects)) : '') . '
 			FROM {db_prefix}messages
 				' . (!empty($msg_tables) ? implode("\n\t", $msg_tables) : '') . '
@@ -1268,6 +1268,8 @@ function Display()
 		if (!empty($message['is_ignored'])) $context['ignoredMsgs'][] = $message['id'];
 		if ($message['can_remove']) $context['removableMessageIDs'][] = $message['id'];
 	}
+
+	$context['avatar_choices'] = get_avatar_choices();
 }
 
 /**
@@ -1350,6 +1352,7 @@ function prepareDisplayContext($reset = false)
 
 	static $counter = null;
 	static $last_time = null;
+	static $rotated_avatars = [];
 
 	// If the query returned false, bail.
 	if ($messages_request == false)
@@ -1472,12 +1475,55 @@ function prepareDisplayContext($reset = false)
 			}
 			if (!empty($character['avatar']))
 			{
-				$output['member']['avatar'] = [
-					'name' => $character['avatar'],
-					'image' => '<img class="avatar" src="' . $character['avatar'] . '" alt="">',
-					'href' => $character['avatar'],
-					'url' => $character['avatar'],
-				];
+				if (!$character['is_main'])
+				{
+					$output['member']['avatar'] = [
+						'name' => $character['avatar'],
+						'image' => '<img class="avatar" src="' . $character['avatar'] . '" alt="">',
+						'href' => $character['avatar'],
+						'url' => $character['avatar'],
+					];
+					if (!empty($character['additional_avatars']) && !empty($character['rotate_avatar']))
+					{
+						if (empty($rotated_avatars[$message['id_character']]))
+						{
+							$avatars = [$character['avatar']];
+							foreach ($character['additional_avatars'] as $avatar)
+							{
+								if (!empty($avatar['avatar']))
+								{
+									$avatars[] = $avatar['avatar'];
+								}
+							}
+							$rotated_avatars[$message['id_character']] = $avatars[array_rand($avatars)];
+						}
+
+						$output['member']['avatar'] = [
+							'name' => $rotated_avatars[$message['id_character']],
+							'image' => '<img class="avatar" src="' . $rotated_avatars[$message['id_character']] . '" alt="">',
+							'href' => $rotated_avatars[$message['id_character']],
+							'url' => $rotated_avatars[$message['id_character']],
+						];
+					}
+					elseif (!empty($message['id_avatar_attach']) && !empty($character['additional_avatars'][$message['id_avatar_attach']]['avatar']))
+					{
+						$output['member']['avatar'] = [
+							'name' => $character['additional_avatars'][$message['id_avatar_attach']]['avatar'],
+							'image' => '<img class="avatar" src="' . $character['additional_avatars'][$message['id_avatar_attach']]['avatar'] . '" alt="">',
+							'href' => $character['additional_avatars'][$message['id_avatar_attach']]['avatar'],
+							'url' => $character['additional_avatars'][$message['id_avatar_attach']]['avatar'],
+						];
+					}
+				}
+				else
+				{
+					$output['member']['avatar'] = [
+						'name' => $character['avatar'],
+						'image' => '<img class="avatar" src="' . $character['avatar'] . '" alt="">',
+						'href' => $character['avatar'],
+						'url' => $character['avatar'],
+					];
+				}
 			}
 			else
 			{

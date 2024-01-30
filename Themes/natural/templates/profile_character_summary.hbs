@@ -40,6 +40,9 @@
 {{#if context.character.editable}}
 				<a href="{{scripturl}}?action=profile;u={{context.id_member}};area=characters;char={{context.character.id_character}};sa=edit" class="button">{{{txt.edit_char_link}}}</a>
 {{/if}}
+{{#if context.character.editable}}
+				<a href="{{scripturl}}?action=profile;u={{context.id_member}};area=characters;char={{context.character.id_character}};sa=avatar" class="button">{{{txt.avatars}}}</a>
+{{/if}}
 
 {{#if (and context.skills_enabled context.user.is_owner)}}
 				<a href="{{scripturl}}?action=profile;u={{context.id_member}};area=character_skills;char={{context.character.id_character}}" class="button">{{{txt.character_skills_link}}}</a>

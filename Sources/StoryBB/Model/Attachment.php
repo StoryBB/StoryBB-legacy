@@ -21,6 +21,8 @@ class Attachment
 	const ATTACHMENT_AVATAR = 1;
 	const ATTACHMENT_THUMBNAIL = 3;
 	const ATTACHMENT_EXPORT = 4;
+	const ATTACHMENT_ADDITIONAL_AVATAR = 5;
+	const ATTACHMENT_ADDITIONAL_AVATAR_EXT = 6;
 
 	/**
 	 * Create a new attachment file hash based on the filename itself and the current time.

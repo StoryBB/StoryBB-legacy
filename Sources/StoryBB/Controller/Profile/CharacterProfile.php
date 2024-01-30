@@ -18,6 +18,7 @@ use StoryBB\Helper\Parser;
 use StoryBB\Model\Alert;
 use StoryBB\Model\Attachment;
 use StoryBB\Model\Character;
+use GuzzleHttp\Client;
 
 class CharacterProfile extends AbstractProfileController
 {
@@ -38,6 +39,7 @@ class CharacterProfile extends AbstractProfileController
 				'move_acct' => 'display_action_move',
 				'theme' => 'display_action_theme',
 				'edit' => 'display_action_edit',
+				'avatar' => 'display_action_avatar',
 			];
 			if (isset($sa[$_GET['sa']]))
 			{
@@ -276,6 +278,7 @@ class CharacterProfile extends AbstractProfileController
 				'move_acct' => 'post_action_move',
 				'theme' => 'post_action_theme',
 				'edit' => 'post_action_edit',
+				'avatar' => 'post_action_avatar',
 			];
 			if (isset($sa[$_GET['sa']]))
 			{
@@ -442,36 +445,6 @@ class CharacterProfile extends AbstractProfileController
 		profileLoadSignatureData();
 
 		$context['form_errors'] = [];
-		$default_avatar = $settings['images_url'] . '/default.png';
-
-		$context['character']['avatar_settings'] = [
-			'custom' => stristr($context['character']['avatar'], 'http://') || stristr($context['character']['avatar'], 'https://') ? $context['character']['avatar'] : 'http://',
-			'selection' => $context['character']['avatar'] == '' || (stristr($context['character']['avatar'], 'http://') || stristr($context['character']['avatar'], 'https://')) ? '' : $context['character']['avatar'],
-			'allow_upload' => allowedTo('profile_upload_avatar') || (!$context['user']['is_owner'] && allowedTo('profile_extra_any')),
-			'allow_external' => allowedTo('profile_remote_avatar') || (!$context['user']['is_owner'] && allowedTo('profile_extra_any')),
-		];
-
-		if ((!empty($context['character']['avatar']) && $context['character']['avatar'] != $default_avatar) && $context['character']['id_attach'] > 0 && $context['character']['avatar_settings']['allow_upload'])
-		{
-			$context['character']['avatar_settings'] += [
-				'choice' => 'upload',
-				'external' => 'http://'
-			];
-			$context['character']['avatar'] = $modSettings['custom_avatar_url'] . '/' . $context['character']['avatar_filename'];
-		}
-		// Use "avatar_original" here so we show what the user entered even if the image proxy is enabled
-		elseif ((stristr($context['character']['avatar'], 'http://') || stristr($context['character']['avatar'], 'https://')) && $context['character']['avatar_settings']['allow_external'] && $context['character']['avatar'] != $default_avatar)
-			$context['character']['avatar_settings'] += [
-				'choice' => 'external',
-				'external' => $context['character']['avatar_original']
-			];
-		else
-			$context['character']['avatar_settings'] += [
-				'choice' => 'none',
-				'external' => 'http://'
-			];
-
-		$context['character']['avatar_settings']['is_url'] = (strpos($context['character']['avatar_settings']['external'], 'https://') === 0) || (strpos($context['character']['avatar_settings']['external'], 'http://') === 0);
 
 		$form_value = !empty($context['character']['signature']) ? $context['character']['signature'] : '';
 		// Get it ready for the editor.
@@ -522,17 +495,6 @@ class CharacterProfile extends AbstractProfileController
 		$this->display_action_edit();
 
 		$changes = [];
-
-		$avatar_value = !empty($_POST['avatar_choice']) ? $_POST['avatar_choice'] : '';
-		$state = profileSaveAvatarData($avatar_value);
-		if ($state !== false) {
-			$context['form_errors']['bad_avatar'] = $txt['profile_error_' . $state];
-		}
-		elseif (isset($profile_vars['avatar']))
-		{
-			$context['character']['avatar'] = $profile_vars['avatar'];
-			$changes['avatar'] = $profile_vars['avatar'];
-		}
 
 		$new_name = !empty($_POST['char_name']) ? StringLibrary::escape(trim($_POST['char_name']), ENT_QUOTES) : '';
 		if ($new_name == '')
@@ -685,5 +647,393 @@ class CharacterProfile extends AbstractProfileController
 				$context['member_groups']['is_additional'] = in_array($id_group, $new_char_groups);
 			}
 		}
+	}
+
+	protected function display_action_avatar()
+	{
+		global $context, $smcFunc, $txt, $sourcedir, $user_info, $modSettings;
+		global $profile_vars, $settings;
+
+		// If they don't have permission to be here, goodbye.
+		if (!$context['character']['editable']) {
+			redirectexit('action=profile;u=' . $context['id_member'] . ';area=characters;char=' . $context['character']['id_character']);
+		}
+
+		$context['sub_template'] = 'profile_character_avatar';
+		loadJavascriptFile('chars.js', ['default_theme' => true], 'chars');
+
+		require_once($sourcedir . '/Subs-Post.php');
+		require_once($sourcedir . '/Profile-Modify.php');
+
+		$context['form_errors'] = [];
+		$default_avatar = $settings['images_url'] . '/default.png';
+
+		$context['character']['avatar_settings'] = [
+			'custom' => stristr($context['character']['avatar'], 'http://') || stristr($context['character']['avatar'], 'https://') ? $context['character']['avatar'] : 'http://',
+			'selection' => $context['character']['avatar'] == '' || (stristr($context['character']['avatar'], 'http://') || stristr($context['character']['avatar'], 'https://')) ? '' : $context['character']['avatar'],
+			'allow_upload' => allowedTo('profile_upload_avatar') || (!$context['user']['is_owner'] && allowedTo('profile_extra_any')),
+			'allow_external' => allowedTo('profile_remote_avatar') || (!$context['user']['is_owner'] && allowedTo('profile_extra_any')),
+		];
+
+		if ((!empty($context['character']['avatar']) && $context['character']['avatar'] != $default_avatar) && $context['character']['id_attach'] > 0 && $context['character']['avatar_settings']['allow_upload'])
+		{
+			$context['character']['avatar_settings'] += [
+				'choice' => 'upload',
+				'external' => 'http://'
+			];
+			$context['character']['avatar'] = $modSettings['custom_avatar_url'] . '/' . $context['character']['avatar_filename'];
+		}
+		// Use "avatar_original" here so we show what the user entered even if the image proxy is enabled
+		elseif ((stristr($context['character']['avatar'], 'http://') || stristr($context['character']['avatar'], 'https://')) && $context['character']['avatar_settings']['allow_external'] && $context['character']['avatar'] != $default_avatar)
+			$context['character']['avatar_settings'] += [
+				'choice' => 'external',
+				'external' => $context['character']['avatar_original']
+			];
+		else
+			$context['character']['avatar_settings'] += [
+				'choice' => 'none',
+				'external' => 'http://'
+			];
+
+		$context['character']['avatar_settings']['is_url'] = (strpos($context['character']['avatar_settings']['external'], 'https://') === 0) || (strpos($context['character']['avatar_settings']['external'], 'http://') === 0);
+
+		$context['allowed_extras'] = [];
+
+		$total_allowed_avatars = 5;
+		// echo '<pre>';
+		// var_dump($context['character']['avatar_settings']);
+		// var_dump($context['character']);
+		// die;
+
+		$keys = array_keys($context['character']['additional_avatars']);
+		$extra_avatars = array_values($context['character']['additional_avatars']);
+
+		for ($i = 0; $i < $total_allowed_avatars - 1; $i++)
+		{
+			$context['additional_avatars'][$i] = [
+				'id' => '',
+				'type' => 'none',
+				'url' => '',
+				'label' => numeric_context('additional_avatars', $i + 1),
+				'title' => numeric_context('additional_avatars', $i + 1),
+			];
+
+			if (isset($keys[$i]))
+			{
+				$context['additional_avatars'][$i]['id'] = $keys[$i];
+				$context['additional_avatars'][$i]['type'] = $extra_avatars[$i]['type'] == 5 ? 'upload' : 'external';
+				$context['additional_avatars'][$i]['preview'] = $extra_avatars[$i]['avatar'];
+				if (!empty($extra_avatars[$i]['label']))
+				{
+					$context['additional_avatars'][$i]['label'] = $extra_avatars[$i]['label'];
+				}
+
+				if ($extra_avatars[$i]['type'] == 5) {
+					$context['additional_avatars'][$i]['filename'] = $extra_avatars[$i]['avatar_filename'];
+				}
+				if ($extra_avatars[$i]['type'] == 6) {
+					$context['additional_avatars'][$i]['url'] = $extra_avatars[$i]['additional_row_original'];
+				}
+			}
+		}
+
+		createToken('edit-char' . $context['character']['id_character'], 'post');
+	}
+
+	protected function post_action_avatar()
+	{
+		global $context, $smcFunc, $txt, $sourcedir, $user_info, $modSettings;
+		global $profile_vars, $settings;
+
+		// If they don't have permission to be here, goodbye.
+		if (!$context['character']['editable']) {
+			redirectexit('action=profile;u=' . $context['id_member'] . ';area=characters;char=' . $context['character']['id_character']);
+		}
+
+		loadLanguage('Errors');
+
+		validateToken('edit-char' . $context['character']['id_character'], 'post');
+
+		$this->display_action_avatar();
+
+		$changes = [];
+
+		$avatar_value = !empty($_POST['avatar_choice']) ? $_POST['avatar_choice'] : '';
+		$state = profileSaveAvatarData($avatar_value);
+		if ($state !== false) {
+			$context['form_errors']['bad_avatar'] = $txt['profile_error_' . $state];
+		}
+		elseif (isset($profile_vars['avatar']))
+		{
+			$context['character']['avatar'] = $profile_vars['avatar'];
+			$changes['avatar'] = $profile_vars['avatar'];
+		}
+
+		if (empty($_POST['additional']) || !is_array($_POST['additional']))
+		{
+			$_POST['additional'] = [];
+		}
+
+		$changes['rotate_avatar'] = (int) ($_POST['rotate_avatar'] ?? '0');
+
+		foreach ($context['additional_avatars'] as $slot => $additional_avatar)
+		{
+			$choice = $_POST['additional'][$slot] ?? 'none';
+
+			if ($choice == 'external')
+			{
+				$label = trim(StringLibrary::escape($_POST['additional_label_external'][$slot] ?? $context['additional_avatars'][$i]['label'], ENT_QUOTES));
+
+				$url = $_POST['additional_url'][$slot] ?? '';
+				if (substr($url, 0, 7) != 'http://' && substr($url, 0, 8) != 'https://')
+				{
+					// invalid URL
+					continue;
+				}
+
+				// @todo XSS??!?!
+				$url = strtr($url, ['"' => '%22', "'" => '%27']);
+
+				if (!empty($additional_avatar['id']))
+				{
+					// They have one already...
+					if ($additional_avatar['type'] == 'external')
+					{
+						$smcFunc['db']->query('', '
+							UPDATE {db_prefix}attachments
+							SET filename = {string:filename},
+								label = {string:label}
+							WHERE id_attach = {int:id}',
+							[
+								'id' => $additional_avatar['id'],
+								'label' => $label,
+								'filename' => $url,
+							]
+						);
+					}
+					else
+					{
+						// Replace the entry...
+						$smcFunc['db']->query('', '
+							UPDATE {db_prefix}attachments
+							SET filename = {string:filename},
+								label = {string:label},
+								attachment_type = {int:attachment_type},
+								file_hash = {empty},
+								fileext = {empty},
+								size = 0,
+								downloads = 0,
+								width = 0,
+								height = 0,
+								mime_type = {empty}
+							WHERE id_attach = {int:id}',
+							[
+								'id' => $additional_avatar['id'],
+								'label' => $label,
+								'attachment_type' => 6,
+								'filename' => $url,
+							]
+						);
+						// And delete the old file.
+						if (!empty($additional_avatar['filename']))
+						{
+							@unlink($modSettings['custom_avatar_dir'] . '/' . $additional_avatar['filename']);
+						}
+					}
+
+					continue;
+				}
+
+				// OK so we're adding a new entry.
+				$smcFunc['db']->insert('insert',
+					'{db_prefix}attachments',
+					[
+						'id_thumb' => 'int', 'id_msg' => 'int', 'id_character' => 'int', 'id_folder' => 'int', 'attachment_type' => 'int',
+						'filename' => 'string', 'file_hash' => 'string', 'fileext' => 'string', 'size' => 'int', 'downloads' => 'int',
+						'width' => 'int', 'height' => 'int', 'mime_type' => 'string', 'approved' => 'int', 'label' => 'string',
+					],
+					[
+						0, 0, $context['character']['id_character'], 1, 6,
+						$url, '', '', 0, 0,
+						0, 0, '', 1, $label,
+					],
+					['id_attach']
+				);
+
+				continue;
+			}
+
+			if ($choice == 'upload')
+			{
+				$label = trim(StringLibrary::escape($_POST['additional_label_upload'][$slot] ?? $context['additional_avatars'][$i]['label'], ENT_QUOTES));
+
+				if (!empty($additional_avatar['id']) && $label != $additional_avatar['label'])
+				{
+					$smcFunc['db']->query('', '
+						UPDATE {db_prefix}attachments
+						SET label = {string:label}
+						WHERE id_attach = {int:id_attach}',
+						[
+							'label' => $label,
+							'id_attach' => $additional_avatar['id'],
+						]
+					);
+				}
+
+				if (!empty($_FILES['additional_upload_' . $slot]['tmp_name']))
+				{
+					$sizes = @getimagesize($_FILES['additional_upload_' . $slot]['tmp_name']);
+					if (empty($sizes))
+					{
+						continue;
+					}
+				}
+				else
+				{
+					continue;
+				}
+
+				$extensions = [
+					'1' => 'gif',
+					'2' => 'jpg',
+					'3' => 'png',
+					'6' => 'bmp',
+					'18' => 'webp',
+				];
+
+				$extension = isset($extensions[$sizes[2]]) ? $extensions[$sizes[2]] : 'bmp';
+
+				if (!empty($additional_avatar['id']))
+				{
+					$attachID = $additional_avatar['id'];
+				}
+				else
+				{
+					$attachID = $smcFunc['db']->insert('',
+						'{db_prefix}attachments',
+						[
+							'id_character' => 'int', 'attachment_type' => 'int', 'size' => 'int', 'id_folder' => 'int',
+						],
+						[
+							$context['character']['id_character'], 5, 0, 1,
+						],
+						['id_attach'],
+						1
+					);
+				}
+
+				if ((!empty($modSettings['avatar_max_width']) && $sizes[0] > $modSettings['avatar_max_width']) || (!empty($modSettings['avatar_max_height']) && $sizes[1] > $modSettings['avatar_max_height']))
+				{
+
+					require_once($sourcedir . '/Subs-Graphics.php');
+
+					$temp = $modSettings['custom_avatar_dir'] . '/avatar_ ' . $context['character']['id_character'] . '_' . $attachID . '_' . time();
+					if (!empty($modSettings['avatar_download_png']))
+						$success = resizeImageFile($_FILES['additional_upload_' . $slot]['tmp_name'], $temp, $modSettings['avatar_max_width'], $modSettings['avatar_max_height'], 3);
+					else
+						$success = resizeImageFile($_FILES['additional_upload_' . $slot]['tmp_name'], $temp, $modSettings['avatar_max_width'], $modSettings['avatar_max_height']);
+
+					if (!$success)
+					{
+						@unlink($temp);
+						unset($temp);
+						continue;
+					}
+
+					$sizes = getimagesize($_FILES['additional_upload_' . $slot]['tmp_name']);
+					$extension = isset($extensions[$sizes[2]]) ? $extensions[$sizes[2]] : 'bmp';
+				}
+
+				$dest_filename = 'avatar_' . $context['character']['id_character'] . '_' . $attachID . '_' . time() . '.' . $extension;
+				$mime_type = 'image/' . ($extension === 'jpg' ? 'jpeg' : ($extension === 'bmp' ? 'x-ms-bmp' : $extension));
+
+				if ((isset($temp) && rename($temp, $modSettings['custom_avatar_dir'] . '/' . $dest_filename)) || move_uploaded_file($_FILES['additional_upload_' . $slot]['tmp_name'], $modSettings['custom_avatar_dir'] . '/' . $dest_filename))
+				{
+					$smcFunc['db']->query('', '
+						UPDATE {db_prefix}attachments
+						SET attachment_type = {int:attachment_type},
+							filename = {string:filename},
+							file_hash = {empty},
+							fileext = {string:extension},
+							size = {int:size},
+							width = {int:width},
+							height = {int:height},
+							mime_type = {string:mime_type},
+							approved = 1,
+							label = {string:label}
+						WHERE id_attach = {int:id_attach}',
+						[
+							'attachment_type' => 5,
+							'filename' => $dest_filename,
+							'extension' => $extension,
+							'size' => filesize($modSettings['custom_avatar_dir'] . '/' . $dest_filename),
+							'width' => $sizes[0],
+							'height' => $sizes[1],
+							'mime_type' => $mime_type,
+							'label' => $label,
+							'id_attach' => $attachID,
+						]
+					);
+
+					@unlink($modSettings['custom_avatar_dir'] . '/' . $additional_avatar['filename']);
+				}
+
+				continue;
+			}
+
+			// Uh oh, we ended up here. Guess the choice wasn't valid, or was 'none'...
+			// Is there an existing avatar to get rid of?
+			if (!empty($additional_avatar['id']))
+			{
+				removeAttachments(['id_character' => $context['character']['id_character'], 'id_attach' => $additional_avatar['id']]);
+			}
+			continue;
+		}
+
+		if (!empty($changes) && empty($context['form_errors']))
+		{
+			if (!empty($modSettings['userlog_enabled'])) {
+				$rows = [];
+				foreach ($changes as $key => $new_value)
+				{
+					$change_array = [
+						'previous' => $context['character'][$key],
+						'new' => $new_value,
+						'applicator' => $context['user']['id'],
+						'member_affected' => $context['id_member'],
+						'id_character' => $context['character']['id_character'],
+						'character_name' => !empty($changes['character_name']) ? $changes['character_name'] : $context['character']['character_name'],
+					];
+
+					$rows[] = [
+						'id_log' => 2, // 2 = profile edits log
+						'log_time' => time(),
+						'id_member' => $context['id_member'],
+						'ip' => $user_info['ip'],
+						'action' => $context['character']['is_main'] && $key == 'character_name' ? 'real_name' : 'char_' . $key,
+						'id_board' => 0,
+						'id_topic' => 0,
+						'id_msg' => 0,
+						'extra' => json_encode($change_array),
+					];
+				}
+				if (!empty($rows)) {
+					$smcFunc['db']->insert('insert',
+						'{db_prefix}log_actions',
+						['id_log' => 'int', 'log_time' => 'int', 'id_member' => 'int',
+							'ip' => 'inet', 'action' => 'string', 'id_board' => 'int',
+							'id_topic' => 'int', 'id_msg' => 'int', 'extra' => 'string'],
+						$rows,
+						[]
+					);
+				}
+			}
+			updateCharacterData($context['character']['id_character'], $changes);
+			session_flash('success', sprintf($txt[$context['user']['is_owner'] ? 'character_updated_you' : 'character_updated_else'], $context['character']['character_name']));
+			redirectexit('action=profile;u=' . $context['id_member'] . ';area=characters;char=' . $context['character']['id_character'] . ';sa=avatar');
+		}
+
+		// Put the new values back in for the form
+		$context['character'] = array_merge($context['character'], $changes);
 	}
 }

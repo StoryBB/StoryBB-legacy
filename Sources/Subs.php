@@ -2745,7 +2745,8 @@ function httpsOn()
 	return $request->isSecure();
 }
 
-function get_avatar_choices($user_id = null, $character_id = null) {
+function get_avatar_choices($user_id = null, $character_id = null)
+{
 	global $user_info, $context, $memberContext, $txt;
 
 	$avatar_choices = [];

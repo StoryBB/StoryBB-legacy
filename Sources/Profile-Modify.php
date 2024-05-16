@@ -412,7 +412,7 @@ function makeThemeChanges($memID, $id_theme)
  * @param bool $returnErrors Whether or not to return any error information
  * @return void|array Returns nothing or returns an array of error info if $returnErrors is true
  */
-function makeCustomFieldChanges($memID, $character = 0, $area, $sanitize = true, $returnErrors = false)
+function makeCustomFieldChanges($memID, $character = 0, $area = 'register', $sanitize = true, $returnErrors = false)
 {
 	global $context, $smcFunc, $user_profile, $user_info, $modSettings;
 	global $sourcedir;
@@ -531,7 +531,7 @@ function makeCustomFieldChanges($memID, $character = 0, $area, $sanitize = true,
 				if (empty($value) && !is_numeric($value))
 					$value = '';
 
-				if ($row['mask'] == 'nohtml' && ($valueReference != strip_tags($valueReference) || $value != filter_var($value, FILTER_SANITIZE_STRING) || preg_match('/<(.+?)[\s]*\/?[\s]*>/si', $valueReference)))
+				if ($row['mask'] == 'nohtml' && ($valueReference != strip_tags($valueReference) || $value != StringLibrary::escape($value, ENT_NOQUOTES) || preg_match('/<(.+?)[\s]*\/?[\s]*>/si', $valueReference)))
 				{
 					if ($returnErrors)
 						$errors[] = 'custom_field_nohtml_fail';

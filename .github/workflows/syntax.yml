@@ -4,12 +4,12 @@ on: [push, pull_request]
 
 jobs:
   syntax:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
 
     strategy:
       fail-fast: true
       matrix:
-        php: ['7.1', '7.2', '7.3', '7.4', '8.0']
+        php: ['8.2', '8.3']
 
     steps:
       - name: Check out repository code
@@ -19,12 +19,12 @@ jobs:
           if find . -name "*.php" ! -path "./vendor/*" -exec php -l {} 2>&1 \; | grep "syntax error, unexpected"; then exit 1; fi
 
   phpcs:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
 
     strategy:
       fail-fast: true
       matrix:
-        php: ['7.2']
+        php: ['8.2']
 
     steps:
       - name: Check out repository code

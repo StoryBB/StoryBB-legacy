@@ -22,7 +22,8 @@ class Pagination
 	protected $num_per_page;
 	protected $current_page;
 	protected $route;
-	protected $params;
+	protected $routeparams;
+	protected $start_param;
 	protected $prevnext;
 
 	/**
@@ -41,7 +42,7 @@ class Pagination
 	 * @param string $start_param The parameter that the pagination 'page' should be injected as.
 	 * @param bool $prevnext Whether the Previous and Next links should be shown (should be on only when navigating the list)
 	 */
-	public function __construct(&$start, int $max, int $per_page = 10, string $route, array $params = [], string $start_param = 'start', bool $prevnext = true)
+	public function __construct(&$start, int $max, int $per_page = 10, string $route = '', array $params = [], string $start_param = 'start', bool $prevnext = true)
 	{
 		// Save whether $start was less than 0 or not.
 		$start = (int) $start;

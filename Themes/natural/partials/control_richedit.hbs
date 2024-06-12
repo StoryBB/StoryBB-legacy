@@ -7,7 +7,7 @@
 
 				$("#{{editor_id}}").sceditor({
 					{{#if (neq editor_id 'quickReply')}}autofocus : true,{{/if}}
-					style: "{{settings.default_theme_url}}/css/jquery.sceditor.default.css",
+					style: "{{settings.theme_url}}/css/jquery.sceditor.default.css",
 					emoticonsCompat: true,{{#if editor_context.locale}}
 					locale: '{{editor_context.locale}}',{{/if}}{{#if context.right_to_left}}
 					rtl: true,{{/if}}

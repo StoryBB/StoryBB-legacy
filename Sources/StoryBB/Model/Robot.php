@@ -33,10 +33,12 @@ class Robot
 			'adidxbot' => 'bingads',
 			'adsbot-google' => 'googleadsense',
 			'alexabot' => 'alexacertify',
+			'anthropic-ai' => 'anthropic',
 			'apis-google' => 'google',
 			'applebot' => 'applebot',
 			'archive.org_bot' => 'archive.org',
 			'ask jeeves' => 'teoma',
+			'awariobot' => 'awario',
 			'awariosmartbot' => 'awario',
 			'baiduspider' => 'baidu',
 			'barkrowler' => 'babbar',
@@ -46,7 +48,11 @@ class Robot
 			'blexbot' => 'webmeup',
 			'bytespider' => 'bytespider',
 			'bw/1' => 'builtwith',
+			'ccbot' => 'ccbot',
+			'chatgpt-user' => 'gptbot',
 			'chrome-lighthouse' => 'pagespeed',
+			'claudebot' => 'claudebot',
+			'cohere-ai' => 'cohere',
 			'deadlinkchecker' => 'deadlinkchecker',
 			'discordapp' => 'discord',
 			'dotbot' => 'moz.com_dotbot',
@@ -64,12 +70,15 @@ class Robot
 			'go-http-client' => 'go',
 			'google-sa' => 'googlesearchappliance',
 			'googlebot' => 'google',
+			'google-extended' => 'google-ai',
 			'google favicon' => 'google',
+			'gptbot' => 'gptbot',
 			'gsacrawler' => 'googlesearchappliance',
 			'gsitecrawler' => 'gsitecrawler',
 			'ia_archiver-web.archive.org' => 'archive.org',
 			'ia_archiver' => 'alexa',
 			'ioncrawl' => 'ioncrawl',
+			'imagesiftbot' => 'imagesift',
 			'jigsaw' => 'w3c_css',
 			'kalooga' => 'kalooga',
 			'ltx71' => 'ltx71',
@@ -167,6 +176,10 @@ class Robot
 				'title' => 'Alexa Certification Crawler',
 				'link' => 'https://support.alexa.com/hc/en-us/articles/200462340-Certification-Crawler-Information',
 			],
+			'anthropic' => [
+				'title' => 'Anthropic',
+				'link' => 'https://anthropic.com/',
+			],
 			'applebot' => [
 				'title' => 'Applebot',
 				'link' => 'http://www.apple.com/go/applebot',
@@ -180,7 +193,7 @@ class Robot
 				'link' => 'https://aspiegel.com/petalbot',
 			],
 			'awario' => [
-				'title' => 'AwarioSmartBot',
+				'title' => 'AwarioBot',
 				'link' => 'https://awario.com/bots.html',
 			],
 			'babbar' => [
@@ -218,6 +231,17 @@ class Robot
 			'bytespider' => [
 				'title' => 'ByteSpider',
 				'link' => 'https://zhanzhang.toutiao.com/',
+			],
+			'ccbot' => [
+				'title' => 'Common Crawl Bot',
+				'link' => 'https://commoncrawl.org/ccbot',
+			],
+			'claudebot' => [
+				'title' => 'Claudebot',
+			],
+			'cohere' => [
+				'title' => 'Cohere',
+				'link' => 'https://cohere.com/',
 			],
 			'deadlinkchecker' => [
 				'title' => 'Dead Link Checker',
@@ -274,12 +298,24 @@ class Robot
 				'title' => 'Google Search Appliances',
 				'link' => 'https://support.google.com/gsa',
 			],
+			'google-ai' => [
+				'title' => 'Google (AI)',
+				'link' => 'https://developers.google.com/search/docs/crawling-indexing/overview-google-crawlers#google-extended',
+			],
+			'gptbot' => [
+				'title' => 'GPTBot',
+				'link' => 'https://openai.com/gptbot',
+			],
 			'gsitecrawler' => [
 				'title' => 'GSiteCrawler',
 				'link' => 'http://www.gsitecrawler.com/',
 			],
 			'ioncrawl' => [
 				'title' => 'IonCrawl',
+			],
+			'imagesift' => [
+				'title' => 'Imagesift',
+				'link' => 'https://imagesift.com/',
 			],
 			'kalooga' => [
 				'title' => 'Kalooga',

@@ -84,6 +84,26 @@ $txt['topic_tracker_last_post_6months'] = '3 - 6 months ago';
 $txt['topic_tracker_last_post_1year'] = '6 months - 1 year ago';
 $txt['topic_tracker_last_post_morethan1year'] = 'more than a year ago';
 
+$txt['topic_tracker_include_topics_where'] = 'Include topics where:';
+$txt['topic_tracker_include_topics_that'] = 'Include topics that:';
+$txt['topic_tracker_include_topics_that_are'] = 'Include topics that are:';
+
+$txt['topic_tracker_i_am_waiting_for_reply'] = 'I\'m waiting for a reply';
+$txt['topic_tracker_i_am_due_to_reply'] = 'I\'m due to reply';
+$txt['topic_tracker_i_am_up_to_date'] = 'I\'m up to date';
+$txt['topic_tracker_there_are_unread_messages'] = 'there are unread messages';
+$txt['topic_tracker_i_posted_in'] = 'I\'ve posted in';
+$txt['topic_tracker_i_was_invited_to'] = 'I was invited to';
+$txt['topic_tracker_finished'] = 'finished';
+$txt['topic_tracker_locked'] = 'locked';
+
+$txt['todo'] = 'To-Do List';
+$txt['todo_no_items'] = 'Nothing on the todo list!';
+$txt['todo_add_item'] = 'Add item';
+$txt['todo_add'] = 'Add';
+$txt['todo_mark_done'] = 'Mark done';
+$txt['todo_mark_not_done'] = 'Mark not done';
+
 $txt['no_profile_edit'] = 'You are not allowed to change this person\'s profile.';
 $txt['signature'] = 'Signature';
 $txt['avatars'] = 'Avatars';

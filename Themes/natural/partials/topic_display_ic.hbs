@@ -29,6 +29,9 @@
 
 					<div class="replies">
 						<p>{{replies}} {{txt.replies}}</p>
+						{{#if has_draft}}
+							<a href="{{{draft_link}}}"><span class="prefix prefix-tertiary">{{{txt.has_draft}}}</span></a>
+						{{/if}}
 					</div>
 					<div class="last-post">
 						<a href="{{{last_post.href}}}">{{{last_post.time}}}</a>

@@ -1,22 +1,82 @@
+		{{! Displaying the todo list }}
+		<div class="cat_bar">
+			<h3 class="catbg">
+				<span>{{{txt.todo}}}</span>
+			</h3>
+		</div>
+		<div class="windowbg">
+			<form action="{{ context.todo_url }}" method="post" accept-charset="UTF-8">
+				<div>
+					<i class="fas fa-plus-circle fa-fw"></i>
+					<input type="text" name="todo" placeholder="{{txt.todo_add_item}}">
+					<input type="submit" name="add" value="{{txt.todo_add}}">
+				</div>
+				{{session_form}}
+			</form>
+			<br>
+
+			{{#unless context.todo}}
+				<div class="infobox success">{{{txt.todo_no_items}}}</div>
+			{{/unless}}
+			{{#if context.todo}}
+				<form action="{{ context.todo_url }}" method="post" accept-charset="UTF-8">
+					<ul class="todo">
+					{{#each context.todo}}
+						<li>
+							{{#if prefix}}<span class="{{prefix.class}}">{{prefix.label}}</span>{{/if}}
+							<span class="{{ class }}">{{ item }}</span>
+							{{#if (gt completed_at 0)}}
+								<button name="undo" value="{{ id_todo }}" title="{{ ../txt.todo_mark_not_done }}"><i class="fas fa-undo"></i></button>
+							{{else}}
+								<button name="markdone" value="{{ id_todo }}" title="{{ ../txt.todo_mark_done }}"><i class="fas fa-check-square"></i></button>
+							{{/if}}
+						</li>
+					{{/each}}
+					</ul>
+					{{session_form}}
+				</form>
+			{{/if}}
+		</div>
+		<br>
+
 		{{! Displaying character topics in a holistic way.}}
 		<div class="cat_bar">
 			<h3 class="catbg">
-				<span>{{{context.page_title}}}</span>
+				<span id="filter_toggle" class="toggle_down floatright" style="cursor: pointer;" title="{{txt.show}}"></span>
+				<span>{{{txt.topic_tracker}}}</span>
 			</h3>
 		</div>
 
 		<div class="windowbg" id="topic_filter" style="display:none">
 			<div class="half_content">
-				<label><input type="checkbox" name="locked"> {{{txt.topic_tracker_locked_topics}}}</label><br>
-				<label><input type="checkbox" name="finished"> {{{txt.topic_tracker_finished_topics}}}</label><br>
-				<label><input type="checkbox" name="unread" checked> {{{txt.topic_tracker_unread_topics}}}</label><br>
-				<label><input type="checkbox" name="nounread" checked> {{{txt.topic_tracker_read_topics}}}</label><br>
-				<br>
-				<label><input type="checkbox" name="lastme" checked> {{{txt.topic_tracker_lastme}}}</label><br>
-				<label><input type="checkbox" name="lastnotme" checked> {{{txt.topic_tracker_lastnotme}}}</label><br>
-				<br>
-				<label><input type="checkbox" name="postedtopic" checked> {{{txt.topic_tracker_posted}}}</label><br>
-				<label><input type="checkbox" name="invitedtopic" checked> {{{txt.topic_tracker_invited}}}</label><br>
+				<dl>
+					<dt>{{{txt.topic_tracker_include_topics_where}}}</dt>
+					<dd>
+						<label><input type="checkbox" name="lastme"> {{{txt.topic_tracker_i_am_waiting_for_reply}}}</label>
+						<label><input type="checkbox" name="lastnotme" checked> {{{txt.topic_tracker_i_am_due_to_reply}}}</label>
+					</dd>
+				</dl>
+				<dl>
+					<dt>{{{txt.topic_tracker_include_topics_where}}}</dt>
+					<dd>
+						<label><input type="checkbox" name="unread" checked> {{{txt.topic_tracker_i_am_up_to_date}}}</label>
+						<label><input type="checkbox" name="nounread" checked> {{{txt.topic_tracker_there_are_unread_messages}}}</label>
+					</dd>
+				</dl>
+				<dl>
+					<dt>{{{txt.topic_tracker_include_topics_that}}}</dt>
+					<dd>
+						<label><input type="checkbox" name="postedtopic" checked> {{{txt.topic_tracker_i_posted_in}}}</label>
+						<label><input type="checkbox" name="invitedtopic" checked> {{{txt.topic_tracker_i_was_invited_to}}}</label>
+					</dd>
+				</dl>
+				<dl>
+					<dt>{{{txt.topic_tracker_include_topics_that_are}}}</dt>
+					<dd class="inline">
+						<label><input type="checkbox" name="finished"> {{{txt.topic_tracker_finished}}}</label>
+						<label><input type="checkbox" name="locked"> {{{txt.topic_tracker_locked}}}</label>
+					</dd>
+				</dl>
 			</div>
 			<div class="half_content">
 				<strong>{{{txt.topic_tracker_last_post}}}</strong><br>
@@ -96,9 +156,11 @@
 		});
 	}
 
+	var has_filters = false;
 	try {
 		var filters = window.localStorage.getItem('topic_tracker_filter');
 		if (filters && (filters = JSON.parse(filters))) {
+			has_filters = true;
 			for (key in filters) {
 				if (filters.hasOwnProperty(key)) {
 					$('#topic_filter input[name="' + key + '"]').prop('checked', filters[key]);
@@ -109,7 +171,25 @@
 		// If this fails, it doesn't matter, we'll just use whatever defaults there are.
 	}
 
-	$('#topic_filter').show();
+	if (!has_filters) {
+		$('#topic_filter').show();
+		$('#filter_toggle').removeClass('toggle_down').addClass('toggle_up');
+	}
 	$('#topic_filter input').on('click', topic_filter);
 	topic_filter();
+
+	var oToggle = new smc_Toggle({
+		bToggleEnabled: true,
+		bCurrentlyCollapsed: has_filters,
+		aSwappableContainers: [
+			'#topic_filter'
+		],
+		aSwapImages: [
+			{
+				sId: '#filter_toggle',
+				altExpanded: {{{json txt.hide}}},
+				altCollapsed: {{{json txt.show}}}
+			}
+		]
+	});
 </script>

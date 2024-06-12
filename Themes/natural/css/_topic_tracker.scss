@@ -1,0 +1,50 @@
+/* Topic tracker */
+
+#topic_filter dl {
+	margin-bottom: 0.5rem;
+
+	@media screen and (min-width: 1024px) {
+		display: flex;
+
+		dt {
+			width: 40%;
+			padding: 0.6rem 0;
+		}
+	}
+
+	label {
+		display: block;
+	}
+
+	dd.inline {
+		label {
+			display: inline-block;
+		}
+	}
+}
+
+.todo {
+	button {
+		border: none;
+		background: transparent;
+		color: $link-color;
+		padding: 5px 8px;
+		cursor: pointer;
+	}
+	li {
+		margin-bottom: 0.6rem;
+
+		.completed {
+			text-decoration: line-through;
+		}
+		.crecent {
+			opacity: 0.8;
+		}
+		.lessrecent {
+			opacity: 0.6;
+		}
+		.notrecent {
+			opacity: 0.4;
+		}
+	}
+}

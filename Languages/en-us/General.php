@@ -124,6 +124,7 @@ $txt['logout'] = 'Logout';
 $txt['started_by'] = 'Started by';
 $txt['topic_started_by'] = 'Started by <strong>%1$s</strong> in <em>%2$s</em>';
 $txt['replies'] = 'Replies';
+$txt['has_draft'] = 'Has draft!';
 $txt['last_post'] = 'Last post';
 $txt['participants'] = 'Participants';
 $txt['already_invited'] = 'Already invited:';

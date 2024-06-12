@@ -963,6 +963,20 @@ class Uncategorised
 					Index::key(['id_member']),
 				]
 			),
+			Table::make('todo',
+				[
+					'id_todo' => Column::int()->auto_increment(),
+					'id_member' => Column::mediumint()->signed(),
+					'item' => Column::varchar(255),
+					'position' => Column::int(),
+					'created_at' => Column::int(),
+					'completed_at' => Column::int(),
+				],
+				[
+					Index::primary(['id_todo']),
+					Index::key(['id_member']),
+				]
+			),
 			Table::make('user_alerts',
 				[
 					'id_alert' => Column::int()->auto_increment(),

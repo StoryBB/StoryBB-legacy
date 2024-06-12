@@ -25,6 +25,7 @@ class TopicTracker implements Routable
 	public static function register_own_routes(RouteCollection $routes): void
 	{
 		$routes->add('topictracker', (new Route('/topic-tracker', ['_function' => [static::class, 'display_action']])));
+		$routes->add('todolist', (new Route('/topic-tracker/todo', ['_function' => [static::class, 'post_action']])));
 	}
 
 	public static function display_action()
@@ -48,6 +49,82 @@ class TopicTracker implements Routable
 		];
 		$context['sub_template'] = 'topic_tracker';
 
+		// Get the todo items.
+		$request = $smcFunc['db']->query('', '
+			SELECT id_todo, item, created_at, completed_at
+			FROM {db_prefix}todo
+			WHERE id_member = {int:member}',
+			[
+				'member' => $context['user']['id'],
+			]
+		);
+		$todo = [];
+		while ($row = $smcFunc['db']->fetch_assoc($request))
+		{
+			$todo[] = $row;
+		}
+		$smcFunc['db']->free_result($request);
+		usort($todo, function($a, $b) {
+			if (empty($a['completed_at']) && empty($b['completed_at']))
+			{
+				// Neither completed, return whichever was made first.
+				return $a['created_at'] <=> $b['created_at'];
+			}
+			elseif (empty($a['completed_at']))
+			{
+				// First item not completed, comes before a completed item.
+				return -1;
+			}
+			elseif (empty($b['completed_at']))
+			{
+				// First item completed, comes after a non-completed item.
+				return 1;
+			}
+			else
+			{
+				// Most recently completed first.
+				return $b['completed_at'] <=> $a['completed_at'];
+			}
+		});
+		foreach ($todo as $todoitem)
+		{
+			$class = !empty($todoitem['completed_at']) ? 'completed' : 'active';
+			if (!empty($todoitem['completed_at']))
+			{
+				$time = time() - $todoitem['completed_at'];
+				if ($time < 86400) {
+					$class .= ' crecent';
+				} elseif ($time < (86400 + 86400)) {
+					$class .= ' lessrecent';
+				} else {
+					$class .= ' notrecent';
+				}
+			}
+			$todoitem['class'] = $class;
+
+			$prefixes = [
+				'Lore' => 'prefix prefix-royalblue',
+				'Wiki' => 'prefix prefix-seagreen',
+				'Forum' => 'prefix prefix-indigo',
+			];
+
+			foreach ($prefixes as $prefix => $prefix_class)
+			{
+				$regex = '/\[' . preg_quote($prefix, '/') . '\]\s*/i';
+				if (preg_match($regex, $todoitem['item']))
+				{
+					$todoitem['prefix'] = [
+						'label' => $prefix,
+						'class' => $prefix_class,
+					];
+					$todoitem['item'] = preg_replace($regex, '', $todoitem['item']);
+				}
+			}
+
+			$context['todo'][$todoitem['id_todo']] = $todoitem;
+		}
+		$context['todo_url'] = $url->generate('todolist');
+
 		$context['time_ago_options'] = [
 			'1week' => ['timestamp' => strtotime('-1 week'), 'label' => $txt['topic_tracker_last_post_1week']],
 			'1month' => ['timestamp' => strtotime('-1 month'), 'label' => $txt['topic_tracker_last_post_1month']],
@@ -65,12 +142,6 @@ class TopicTracker implements Routable
 			{
 				$character_ids[] = $character['id_character'];
 			}
-		}
-
-		// They shouldn't be able to get here if they have no non-OOC characters but just in case...
-		if (empty($character_ids))
-		{
-			fatal_lang_error('no_access', false);
 		}
 
 		// First, step through and set it up.
@@ -158,7 +229,7 @@ class TopicTracker implements Routable
 				chars.avatar AS first_member_avatar, af.filename AS first_member_filename,
 				chars2.avatar AS last_member_avatar, al.filename AS last_member_filename,
 				t.id_first_msg, t.id_last_msg, t.num_replies,
-				ms.poster_time AS first_poster_time, ml.poster_time AS last_poster_time
+				ms.poster_time AS first_poster_time, ml.poster_time AS last_poster_time, ud.id_draft
 			FROM {db_prefix}topics AS t
 				INNER JOIN {db_prefix}boards AS b ON (b.id_board = t.id_board AND {query_see_board})
 				INNER JOIN {db_prefix}messages AS ms ON (ms.id_msg = t.id_first_msg)
@@ -171,6 +242,7 @@ class TopicTracker implements Routable
 				LEFT JOIN {db_prefix}log_mark_read AS lmr ON (lmr.id_board = b.id_board AND lmr.id_member = {int:current_member})
 				LEFT JOIN {db_prefix}attachments AS af ON (af.id_character = ms.id_character AND af.attachment_type = 1)
 				LEFT JOIN {db_prefix}attachments AS al ON (al.id_character = ml.id_character AND al.attachment_type = 1)
+				LEFT JOIN {db_prefix}user_drafts AS ud ON (ud.type = {int:post_draft} AND ud.id_member = {int:current_member} AND ud.id_topic = t.id_topic)
 			WHERE t.id_topic IN ({array_int:topic_ids})
 				AND b.in_character = {int:in_character}',
 			[
@@ -178,11 +250,14 @@ class TopicTracker implements Routable
 				'is_approved' => 1,
 				'topic_ids' => $topic_ids,
 				'in_character' => 1,
+				'post_draft' => 0,
 			]
 		);
 
 		while ($row = $smcFunc['db']->fetch_assoc($request))
 		{
+			$has_draft = !empty($topic_data[$row['id_topic']]['has_draft']) || !empty($row['id_draft']);
+
 			$classes = 'topic-ic';
 			if (!empty($row['locked']))
 			{
@@ -230,6 +305,8 @@ class TopicTracker implements Routable
 				],
 				'subject' => $row['subject'],
 				'replies' => comma_format($row['num_replies']),
+				'has_draft' => $has_draft,
+				'draft_link' => $has_draft ? $scripturl . '?action=profile;area=drafts;u=' . $context['user']['id'] : '',
 				'new' => $row['new_from'] <= $row['id_msg_modified'],
 				'new_from' => $row['new_from'],
 				'is_locked' => !empty($row['locked']),
@@ -323,5 +400,65 @@ class TopicTracker implements Routable
 				$context['user']['characters'][$id_character]['topics'][$id_topic]['css_class'] .= (!empty($topic['invite']) ? ' invitedtopic' : ' postedtopic');
 			}
 		}
+	}
+
+	public static function post_action()
+	{
+		global $context, $txt, $smcFunc, $scripturl, $memberContext;
+
+		is_not_guest();
+
+		checkSession();
+
+		if (!empty($_POST['add']))
+		{
+			$todo = trim($_POST['todo'] ?? '');
+			if (!empty($todo))
+			{
+				$smcFunc['db']->insert(
+					'insert',
+					'{db_prefix}todo',
+					['id_member' => 'int', 'item' => 'string-255', 'created_at' => 'int', 'completed_at' => 'int'],
+					[$context['user']['id'], $todo, time(), 0],
+					['id_todo']
+				);
+			}
+		}
+		elseif (!empty($_POST['markdone']))
+		{
+			$id = abs((int) $_POST['markdone']);
+			$smcFunc['db']->query('', '
+				UPDATE {db_prefix}todo
+				SET completed_at = {int:time}
+				WHERE id_member = {int:member}
+					AND id_todo = {int:todo}
+					AND completed_at = {int:notdone}',
+				[
+					'time' => time(),
+					'member' => $context['user']['id'],
+					'todo' => $id,
+					'notdone' => 0,
+				]
+			);
+		}
+		elseif (!empty($_POST['undo']))
+		{
+			$id = abs((int) $_POST['undo']);
+			$smcFunc['db']->query('', '
+				UPDATE {db_prefix}todo
+				SET completed_at = {int:notdone}
+				WHERE id_member = {int:member}
+					AND id_todo = {int:todo}
+					AND completed_at != {int:notdone}',
+				[
+					'member' => $context['user']['id'],
+					'todo' => $id,
+					'notdone' => 0,
+				]
+			);
+		}
+
+		$url = App::container()->get('urlgenerator');
+		redirectexit($url->generate('topictracker'));
 	}
 }

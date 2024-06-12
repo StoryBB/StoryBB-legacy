@@ -277,10 +277,9 @@ class CurrentUser
 		}
 
 		$this->user_data['permissions']['board'] = [];
+		$this->user_data['permissions']['board_profiles'] = [];
 
 		$db = $this->db();
-
-		$profiles = [];
 
 		$request = $db->query('', '
 			SELECT id_profile, permission, add_deny
@@ -305,7 +304,7 @@ class CurrentUser
 
 		foreach ($profiles as $id_profile => $profile)
 		{
-			$profiles[$id_profile] = array_diff($profile, $removals);
+			$this->user_data['permissions']['board_profiles'][$id_profile] = array_diff($profile, $removals);
 		}
 
 		$request = $db->query('', '
@@ -313,7 +312,7 @@ class CurrentUser
 			FROM {db_prefix}boards');
 		while ($db->fetch_assoc($request))
 		{
-			$this->user_data['permission']['board'][$row['id_board']] = $row['id_profile'];
+			$this->user_data['permissions']['board'][$row['id_board']] = $this->user_data['permissions']['board_profiles'][$row['id_profile']] ?? [];
 		}
 		$db->free_result($request);
 	}

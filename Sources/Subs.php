@@ -2702,7 +2702,7 @@ function get_user_possible_characters($id_member, $board_id = 0)
 					// IC board that requires IC only, and character is main and (not admin or no admin override)
 					if (!$announced && $character['id_character'] == $user_info['id_character'])
 					{
-						session_flash('warning', (string) new Phrase('General:cannot_post_ooc'));
+						session_flash('warning-secondary', (string) new Phrase('General:cannot_post_ooc'));
 						$announced = true;
 					}
 					continue;
@@ -2715,7 +2715,7 @@ function get_user_possible_characters($id_member, $board_id = 0)
 					// OOC board that requires OOC only, and character is not main and (not admin or no admin override)
 					if (!$announced && $character['id_character'] == $user_info['id_character'])
 					{
-						session_flash('warning', (string) new Phrase('General:cannot_post_ic'));
+						session_flash('warning-secondary', (string) new Phrase('General:cannot_post_ic'));
 						$announced = true;
 					}
 					continue;

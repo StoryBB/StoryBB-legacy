@@ -24,7 +24,7 @@ use Performing\TwigComponents\Configuration;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
-use Symfony\Component\HttpFoundation\Session\Attribute\NamespacedAttributeBag;
+use Symfony\Component\HttpFoundation\Session\Attribute\AttributeBag;
 use Symfony\Component\HttpFoundation\Session\Storage\NativeSessionStorage;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
@@ -127,11 +127,11 @@ class AdminWeb
 			if ($site_settings->databaseSession_enable)
 			{
 				$session_storage = new NativeSessionStorage($cookie_settings, $container->instantiate('StoryBB\\Session\\DatabaseHandler'));
-				$session = new Session($session_storage, new NamespacedAttributeBag);
+				$session = new Session($session_storage, new AttributeBag);
 			}
 			else
 			{
-				$session = new Session($cookie_settings, new NamespacedAttributeBag);
+				$session = new Session($cookie_settings, new AttributeBag);
 			}
 
 			$session->setName($cookiename);

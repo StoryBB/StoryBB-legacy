@@ -32,7 +32,7 @@ Configuration::make($twig)
 
 To enable the package just pass your Twig environment object to the function and specify your components folder relative to your Twig templates folder.
 
-### Craft CMS example
+### Craft CMS
 
 In Craft CMS you should do something like this.
 
@@ -54,6 +54,48 @@ if (Craft::$app->request->getIsSiteRequest()) {
 ```
 
 > The `if` statement ensure you don't get `'Unable to register extension "..." as extensions have already been initialized'` as error.
+
+### Symfony
+
+In Symfony you can do something like this.
+
+```yml
+# services.yml
+
+services:
+    My\Namespace\TwigEnvironmentConfigurator:
+        decorates: 'twig.configurator.environment'
+        arguments: [ '@My\Namespace\TwigEnvironmentConfigurator.inner' ]
+```
+```php
+
+// TwigEnvironmentConfigurator.php
+
+use Symfony\Bundle\TwigBundle\DependencyInjection\Configurator\EnvironmentConfigurator;
+use Twig\Environment;
+use Performing\TwigComponents\Configuration;
+
+final class TwigEnvironmentConfigurator
+{
+    public function __construct(
+        private EnvironmentConfigurator $decorated
+    ) {}
+
+    public function configure(Environment $environment) : void
+    {
+        $this->decorated->configure($environment);
+
+        // Relative path to your components folder
+        $relativePath = '_components'; 
+
+        Configuration::make($environment)
+            ->setTemplatesPath($relativePath)
+            ->setTemplatesExtension('twig')
+            ->useCustomTags()
+            ->setup();
+    }
+}
+```
 
 ## Usage
 

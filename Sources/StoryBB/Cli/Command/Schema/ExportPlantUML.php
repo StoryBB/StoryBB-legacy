@@ -31,7 +31,7 @@ class ExportPlantUML extends Command implements StoryBBCommand
 			->setHelp('This command exports the StoryBB schema to a specified destination path in PlantUML format.')
 			->addArgument('path', InputArgument::REQUIRED, 'The destination path to write to');
 	}
-	public function execute(InputInterface $input, OutputInterface $output)
+	public function execute(InputInterface $input, OutputInterface $output): int
 	{
 		$path = $input->getArgument('path');
 		if (substr($path, 0, 2) == './')

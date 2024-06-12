@@ -34,7 +34,7 @@ class ErrorResponse extends RenderResponse
 		$this->setProtocolVersion('1.0');
 	}
 
-	public function sendContent()
+	public function sendContent(): static
 	{
 		$this->render('error_fatal.twig', ['error_title' => new Phrase('General:error_occured'), 'error_message' => $this->content]);
 		parent::sendContent();

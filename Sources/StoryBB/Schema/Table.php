@@ -34,6 +34,7 @@ class Table
 	protected $indexes = [];
 
 	/** @var array $constraints An array of Constraint objects that are the constraints on this table. */
+	protected $constraints = [];
 
 	/** @var array $opts An array of options for this table's creation/setup. */
 	protected $opts = [];
@@ -51,7 +52,7 @@ class Table
 	 * @param array $opts An array of options about this object, e.g. table engine preferences.
 	 * @return Table The table instance.
 	 */
-	private function __construct(string $table_name, array $columns, array $indexes = [], array $constraints, array $opts = [])
+	private function __construct(string $table_name, array $columns, array $indexes = [], array $constraints = [], array $opts = [])
 	{
 		$this->table_name = $table_name;
 		$this->columns = $columns;

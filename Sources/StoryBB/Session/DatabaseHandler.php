@@ -43,7 +43,7 @@ class DatabaseHandler extends AbstractSessionHandler
 		return $this->sessionExpired;
 	}
 
-	public function open($save_path, $session_name)
+	public function open(string $save_path, string $session_name): bool
 	{
 		parent::open($save_path, $session_name);
 		$this->sessionExpired = false;
@@ -51,16 +51,16 @@ class DatabaseHandler extends AbstractSessionHandler
 		return true;
 	}
 
-	public function gc($maxlifetime)
+	public function gc(int $maxlifetime): int|false
 	{
 		// We delay gc() to close() so that it is executed outside the transactional and blocking read-write process.
 		// This way, pruning expired sessions does not block them from being started while the current session is used.
 		$this->gcCalled = true;
 
-		return true;
+		return 0;
 	}
 
-	protected function doDestroy($session_id)
+	protected function doDestroy(#[\SensitiveParameter] string $session_id): bool
 	{
 		$this->db()->query('', '
 			DELETE FROM {db_prefix}sessions
@@ -73,7 +73,7 @@ class DatabaseHandler extends AbstractSessionHandler
 		return true;
 	}
 
-	protected function doWrite($session_id, $data)
+	protected function doWrite(#[\SensitiveParameter] string $session_id, string $data): bool
 	{
 		$maxlifetime = max((int) ini_get('session.gc_maxlifetime'), 2880);
 
@@ -107,6 +107,7 @@ class DatabaseHandler extends AbstractSessionHandler
 		return true;
 	}
 
+	#[\ReturnTypeWillChange]
 	public function updateTimestamp($session_id, $data)
 	{
 		$expiry = (int) ini_get('session.gc_maxlifetime');
@@ -126,7 +127,7 @@ class DatabaseHandler extends AbstractSessionHandler
 		return true;
 	}
 
-	public function close()
+	public function close(): bool
 	{
 		if ($this->gcCalled) {
 			$this->gcCalled = false;
@@ -146,7 +147,7 @@ class DatabaseHandler extends AbstractSessionHandler
 		return true;
 	}
 
-	protected function doRead($session_id)
+	protected function doRead(#[\SensitiveParameter] string $session_id): string
 	{
 		$db = $this->db();
 		$result = $db->query('', '

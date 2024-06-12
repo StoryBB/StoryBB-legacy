@@ -30,7 +30,7 @@ class PublicList extends Command implements StoryBBCommand
 			->setHelp('This lists all of the routes currently defined across the platform.');
 	}
 
-	public function execute(InputInterface $input, OutputInterface $output)
+	public function execute(InputInterface $input, OutputInterface $output): int
 	{
 		$router = App::container()->get('router_public');
 

@@ -34,7 +34,7 @@ class UpdateSQL extends Command implements StoryBBCommand
 			->setHelp('This command exports the necessary SQL to upgrade whatever is currently in the database, to the current database schema.');
 	}
 
-	public function execute(InputInterface $input, OutputInterface $output)
+	public function execute(InputInterface $input, OutputInterface $output): int
 	{
 		$db = $this->db();
 		$results = DatabaseSchema::update_schema($db, true);

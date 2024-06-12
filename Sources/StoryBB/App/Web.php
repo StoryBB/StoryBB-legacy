@@ -156,11 +156,11 @@ class Web
 			if ($site_settings->databaseSession_enable)
 			{
 				$session_storage = new NativeSessionStorage($cookie_settings, $container->instantiate('StoryBB\\Session\\DatabaseHandler'));
-				$session = new Session($session_storage, new NamespacedAttributeBag);
+				$session = new Session($session_storage, new AttributeBag);
 			}
 			else
 			{
-				$session = new Session($cookie_settings, new NamespacedAttributeBag);
+				$session = new Session($cookie_settings, new AttributeBag);
 			}
 
 			$session->setName($cookiename);

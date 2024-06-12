@@ -84,6 +84,7 @@ abstract class IntegrationTestCase extends TestCase
 
     /**
      * @dataProvider getLegacyTests
+     *
      * @group legacy
      */
     public function testLegacyIntegration($file, $message, $condition, $templates, $exception, $outputs, $deprecation = '')
@@ -101,7 +102,7 @@ abstract class IntegrationTestCase extends TestCase
                 continue;
             }
 
-            if ($legacyTests xor false !== strpos($file->getRealpath(), '.legacy.test')) {
+            if ($legacyTests xor str_contains($file->getRealpath(), '.legacy.test')) {
                 continue;
             }
 
@@ -148,6 +149,7 @@ abstract class IntegrationTestCase extends TestCase
         }
 
         if ($condition) {
+            $ret = '';
             eval('$ret = '.$condition.';');
             if (!$ret) {
                 $this->markTestSkipped($condition);
@@ -233,7 +235,7 @@ abstract class IntegrationTestCase extends TestCase
             }
 
             if (false !== $exception) {
-                list($class) = explode(':', $exception);
+                [$class] = explode(':', $exception);
                 $constraintClass = class_exists('PHPUnit\Framework\Constraint\Exception') ? 'PHPUnit\Framework\Constraint\Exception' : 'PHPUnit_Framework_Constraint_Exception';
                 $this->assertThat(null, new $constraintClass($class));
             }
@@ -257,11 +259,9 @@ abstract class IntegrationTestCase extends TestCase
         $templates = [];
         preg_match_all('/--TEMPLATE(?:\((.*?)\))?--(.*?)(?=\-\-TEMPLATE|$)/s', $test, $matches, \PREG_SET_ORDER);
         foreach ($matches as $match) {
-            $templates[($match[1] ?: 'index.twig')] = $match[2];
+            $templates[$match[1] ?: 'index.twig'] = $match[2];
         }
 
         return $templates;
     }
 }
-
-class_alias('Twig\Test\IntegrationTestCase', 'Twig_Test_IntegrationTestCase');

@@ -34,7 +34,7 @@ class Update extends Command implements StoryBBCommand
 			->setHelp('This command updates the database.');
 	}
 
-	public function execute(InputInterface $input, OutputInterface $output)
+	public function execute(InputInterface $input, OutputInterface $output): int
 	{
 		DatabaseSchema::update_schema($this->db(), false);
 

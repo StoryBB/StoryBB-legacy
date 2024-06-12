@@ -30,7 +30,7 @@ class AdminList extends Command implements StoryBBCommand
 			->setHelp('This lists all of the routes currently defined across the platform within the admin namespace.');
 	}
 
-	public function execute(InputInterface $input, OutputInterface $output)
+	public function execute(InputInterface $input, OutputInterface $output): int
 	{
 		$router = App::container()->get('router_admin');
 

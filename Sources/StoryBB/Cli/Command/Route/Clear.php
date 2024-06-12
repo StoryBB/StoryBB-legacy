@@ -29,7 +29,7 @@ class Clear extends Command implements StoryBBCommand
 			->setHelp('The routing table (list of URLs and the associated classes) sometimes may become out of date. This allows clearing the list.');
 	}
 
-	public function execute(InputInterface $input, OutputInterface $output)
+	public function execute(InputInterface $input, OutputInterface $output): int
 	{
 		$cachedir = App::container()->get('cachedir');
 

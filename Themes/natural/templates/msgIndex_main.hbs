@@ -57,6 +57,12 @@
 	<form action="{{scripturl}}?action=quickmod;board={{context.current_board}}.{{context.start}}" method="post" accept-charset="UTF-8" class="clear" name="quickModForm" id="quickModForm">
 	{{/if}}
 
+		{{#each context.session_flash}}
+			{{#if (eq @key 'warning-secondary')}}
+				{{#each this}}<div class="noticebox">{{{.}}}</div>{{/each}}
+			{{/if}}
+		{{/each}}
+
 		<div id="messageindex">
 
 {{#if context.is_character_board}}

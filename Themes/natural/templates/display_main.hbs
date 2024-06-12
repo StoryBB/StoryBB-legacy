@@ -4,6 +4,12 @@
 </div>
 {{/if}}
 
+{{#each context.session_flash}}
+	{{#if (eq @key 'warning-secondary')}}
+		{{#each this}}<div class="noticebox">{{{.}}}</div>{{/each}}
+	{{/if}}
+{{/each}}
+
 {{! New topic info }}
 <div id="display_head" class="information">
 	<h2 class="display_title">
@@ -141,7 +147,13 @@
 	</div>
 </div>
 
-{{> linktree}}	
+{{> linktree}}
+
+{{#each context.session_flash}}
+	{{#if (eq @key 'warning-secondary')}}
+		{{#each this}}<div class="noticebox">{{{.}}}</div>{{/each}}
+	{{/if}}
+{{/each}}
 	
 {{! moderation buttons }}
 <div id="moderationbuttons">

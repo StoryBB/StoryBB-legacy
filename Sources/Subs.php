@@ -1035,6 +1035,8 @@ function obExit($header = null, $do_footer = null, $from_index = false, $from_fa
 			$context['sub_template'] = 'main';
 		}
 
+		$context['session_flash'] = session_flash_retrieve();
+
 		foreach ((array) $context['sub_template'] as $sub_template) {
 			$phpStr = StoryBB\Template::compile(StoryBB\Template::load($sub_template), [], $settings['theme_id'] . '-' . $sub_template);
 			$content .= StoryBB\Template::prepare($phpStr, [
@@ -1110,7 +1112,7 @@ function login_helper($string, $guest_title, $forum_name, $scripturl, $login)
 function session_flash(string $status, string $message)
 {
 	$container = Container::instance();
-	if (!in_array($status, ['success', 'warning', 'error']))
+	if (!in_array($status, ['success', 'warning', 'error', 'warning-secondary']))
 	{
 		fatal_error('Invalid session flash');
 	}
@@ -1133,11 +1135,19 @@ function session_flash_retrieve()
 	$session = $container->get('session');
 
 	$messages = [];
-	foreach (['error', 'warning', 'success'] as $status)
+	foreach (['error', 'warning', 'success', 'warning-secondary'] as $status)
 	{
 		$messages[$status] = $session->getFlashBag()->get($status);
 	}
+
 	return $messages;
+}
+
+function session_flash_empty(string $status)
+{
+	$container = Container::instance();
+	$flashbag = $container->get('session')->getFlashBag();
+	$flashbag->get($status);
 }
 
 /**

@@ -832,9 +832,18 @@ function loadPermissions()
 	$user_info['permissions'] = array_diff($user_info['permissions'], $removals);
 
 	// And if this is an OOC board, we might have to remove some permissions.
-	$disable_posting = !empty($board_info['in_character']) && $user_info['char_is_main'];
+	session_flash_empty('warning-secondary');
+	$disable_posting = (!empty($board_info['in_character']) && $user_info['char_is_main']) || (empty($board_info['in_character']) && !$user_info['char_is_main']);
 	if ($disable_posting)
 	{
+		if (!empty($board_info['in_character']) && $user_info['char_is_main'])
+		{
+			session_flash('warning-secondary', (string) new \StoryBB\Phrase('General:cannot_post_ooc'));
+		}
+		else
+		{
+			session_flash('warning-secondary', (string) new \StoryBB\Phrase('General:cannot_post_ic'));
+		}
 		$user_info['permissions'] = array_diff($user_info['permissions'], [
 			'moderate_board',
 			'approve_posts',

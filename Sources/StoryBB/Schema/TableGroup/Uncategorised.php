@@ -178,6 +178,23 @@ class Uncategorised
 					Constraint::from('characters.id_member')->to('members.id_member'),
 				]
 			),
+			Table::make('character_connections',
+				[
+					'id_connection' => Column::int()->auto_increment(),
+					'id_character_from' => Column::mediumint(),
+					'id_character_to' => Column::mediumint(),
+					'connection_type' => Column::tinyint(),
+					'connection_label' => Column::varchar(255),
+				],
+				[
+					Index::primary(['id_connection']),
+					Index::key(['id_character_from', 'id_character_to']),
+				],
+				[
+					Constraint::from('character_connections.id_character_from')->to('characters.id_character'),
+					Constraint::from('character_connections.id_character_to')->to('characters.id_character'),
+				]
+			),
 			Table::make('character_sheet_comments',
 				[
 					'id_comment' => Column::int()->auto_increment(),

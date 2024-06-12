@@ -17,7 +17,7 @@ use StoryBB\Database\AdapterFactory;
 use StoryBB\Database\Exception\InvalidAdapterException;
 use StoryBB\Helper\Cookie;
 use StoryBB\Helper\ServerEnvironment;
-use Symfony\Component\HttpFoundation\Session\Attribute\NamespacedAttributeBag;
+use Symfony\Component\HttpFoundation\Session\Attribute\AttributeBag;
 use Symfony\Component\HttpFoundation\Session\Storage\NativeSessionStorage;
 use Symfony\Component\HttpFoundation\Session\Session;
 
@@ -1491,11 +1491,11 @@ function DeleteInstall()
 		if ($site_settings->databaseSession_enable)
 		{
 			$session_storage = new NativeSessionStorage($cookie_settings, $container->instantiate('StoryBB\\Session\\DatabaseHandler'));
-			$session = new Session($session_storage, new NamespacedAttributeBag);
+			$session = new Session($session_storage, new AttributeBag);
 		}
 		else
 		{
-			$session = new Session($cookie_settings, new NamespacedAttributeBag);
+			$session = new Session($cookie_settings, new AttributeBag);
 		}
 
 		$session->setName($cookiename);

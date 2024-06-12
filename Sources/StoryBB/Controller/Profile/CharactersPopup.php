@@ -83,7 +83,8 @@ class CharactersPopup extends AbstractProfileController
 			if (!$character['is_main'] && !$character['retired'])
 			{
 				$context['current_characters'][$id_character]['sheet_url'] = $scripturl . '?action=profile;area=character_sheet;u=' . $context['user']['id'] . ';char=' . $id_character;
-				$context['current_characters'][$id_character]['avatar_url'] = $scripturl . '?action=profile;area=characters;u=' . $context['user']['id'] . ';char=' . $id_character . ';sa=edit';
+				$context['current_characters'][$id_character]['avatar_url'] = $scripturl . '?action=profile;area=characters;u=' . $context['user']['id'] . ';char=' . $id_character . ';sa=avatar';
+				$context['current_characters'][$id_character]['settings_url'] = $scripturl . '?action=profile;area=characters;u=' . $context['user']['id'] . ';char=' . $id_character . ';sa=edit';
 			}
 		}
 	}

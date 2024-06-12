@@ -38,7 +38,7 @@
 
 .chars_container .character {
 	display: grid;
-	grid-template-columns: auto 40px 40px 40px;
+	grid-template-columns: auto 40px 40px 40px 40px;
 	column-gap: 10px;
 	margin-bottom: 10px;
 
@@ -60,6 +60,11 @@
 	.character-avatar-link {
 		grid-column-start: 4;
 		grid-column-end: 5;
+	}
+
+	.character-signature-link {
+		grid-column-start: 5;
+		grid-column-end: 6;
 	}
 }
 

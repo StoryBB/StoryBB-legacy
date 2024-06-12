@@ -1,0 +1,42 @@
+		{{! The main character list }}
+		<div class="cat_bar">
+			<h3 class="catbg">
+				<span>{{{txt.character_skills}}}</span>
+			</h3>
+		</div>
+		<div class="information">{{{txt.character_skills_list_skills}}}</div>
+
+		<div class="character-skillset">
+			{{#each context.skills}}
+				<div class="cat_bar">
+					<h3 class="catbg skillset-title skillset-title-{{ @key }}">{{ this.title }}</h3>
+				</div>
+				<div class="skillset-content skillset-content-{{ @key }}">
+
+					{{#each this.skills}}
+						<div class="title_bar skillset-branch skillset-branch-{{ @key }}">
+							<h4 class="titlebg">{{ this.title }}</h4>
+						</div>
+
+
+						<div class="skill-branch skill-branch-{{ @key }}">
+							<div class="windowbg">
+						{{#each this.skills}}
+								<div class="skill skill-{{ @key }} full-width"><label>{{ this.name }}</label></div>
+
+								{{#each this.characters}}
+									<div class="lastpost">
+										<div class="last_poster">
+											<img class="avatar" src="{{ this.avatar }}">
+										</div>
+										<p><a href="{{../../../../scripturl}}{{{ this.character_url }}}">{{{ this.character_name }}}</a></p>
+									</div>
+								{{/each}}
+						{{/each}}
+							</div>
+						</div>
+
+					{{/each}}
+				</div>
+			{{/each}}
+		</div>

@@ -1464,10 +1464,17 @@ function prepareDisplayContext($reset = false)
 	// Getting the poster is a little tricky. Start with whatever we have
 	// for the account as a whole and see if we can make a character out of it.
 	$output['member'] = $memberContext[$message['id_member']];
+	static $playby = [];
+
 	if (!empty($memberContext[$message['id_member']]['id']))
 	{
 		if (!empty($output['member']['characters'][$message['id_character']]))
 		{
+			if ($board_info['in_character'] && !isset($playby[$message['id_member']]))
+			{
+				$playby[$message['id_member']] = true;
+				$output['member']['played_by'] = $memberContext[$message['id_member']]['name'];
+			}
 			$character = $output['member']['characters'][$message['id_character']];
 			if (!empty($character['char_sheet']))
 			{

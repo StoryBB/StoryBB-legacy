@@ -122,6 +122,7 @@ $txt['at'] = 'at';
 $txt['by'] = 'by';
 $txt['logout'] = 'Logout';
 $txt['started_by'] = 'Started by';
+$txt['played_by'] = 'Played by %1$s';
 $txt['topic_started_by'] = 'Started by <strong>%1$s</strong> in <em>%2$s</em>';
 $txt['replies'] = 'Replies';
 $txt['has_draft'] = 'Has draft!';

@@ -14,6 +14,7 @@ namespace StoryBB\Controller;
 
 use StoryBB\Container;
 use StoryBB\Database\DatabaseAdapter;
+use StoryBB\Helper\Epub\Epub3;
 use StoryBB\Helper\Parser;
 use StoryBB\Model\TopicPrefix;
 use StoryBB\Routing\Behaviours\Routable;
@@ -30,6 +31,7 @@ class Shippers implements Routable
 		$routes->add('shipper_edit', (new Route('/shippers/{firstchar<\d+>}/{secondchar<\d+>}/edit', ['_function' => [static::class, 'edit_shipper']])));
 		$routes->add('shipper_timeline', (new Route('/shippers/{firstchar<\d+>}/{secondchar<\d+>}/timeline', ['_function' => [static::class, 'edit_timeline']])));
 		$routes->add('shipper_visibility', (new Route('/shippers/{firstchar<\d+>}/{secondchar<\d+>}/toggle/{session_var}/{session_id}', ['_function' => [static::class, 'toggle_hidden']])));
+		$routes->add('shipper_epub', (new Route('/shippers/{firstchar<\d+>}/{secondchar<\d+>}/epub', ['_function' => [static::class, 'export_epub']])));
 	}
 
 	protected static function assert_enabled(): void
@@ -208,6 +210,7 @@ class Shippers implements Routable
 				'topics' => [],
 				'show' => true,
 				'editable' => allowedTo('admin_forum'),
+				'epub' => $urlgenerator->generate('shipper_epub', ['firstchar' => $participants[0], 'secondchar' => $participants[1]]),
 			];
 
 			foreach ($participants as $id_character)
@@ -223,7 +226,7 @@ class Shippers implements Routable
 				return strcasecmp($a, $b);
 			});
 
-			$ship['label'] = implode('', $ship['characters']);
+			$ship['label'] = implode(' x ', $ship['characters']);
 
 			$ship_id_chars = ((int) $participants[0] > (int) $participants[1]) ? $participants[1] . '_' . $participants[0] : $participants[0] . '_' . $participants[1];
 			$existing_ship = $custom_ships_by_character[$ship_id_chars] ?? 0;
@@ -288,7 +291,7 @@ class Shippers implements Routable
 							{
 								if (!empty($characters[$extra]))
 								{
-									$ship['topics'][$topic]['extra_characters'][] = $characters[$extra]['character_name'];
+									$ship['topics'][$topic]['extra_characters'][$extra] = $characters[$extra]['character_name'];
 								}
 							}
 						}
@@ -727,5 +730,42 @@ class Shippers implements Routable
 				$context['other_ships'][$ship_id]['topics'][$topic_id]['extra_characters'] = $extra_chars;
 			}
 		}
+	}
+
+	public static function export_epub()
+	{
+		global $context, $txt, $sourcedir, $smcFunc, $cachedir, $boardurl;
+
+		is_not_guest();
+		static::assert_enabled();
+
+		require_once($sourcedir . '/Subs-Post.php');
+		require_once($sourcedir . '/Subs-Editor.php');
+
+		$container = Container::instance();
+		$urlgenerator = $container->get('urlgenerator');
+
+		try {
+			[$ships, $characters] = static::get_shippers();
+		}
+		catch (\Exception $e)
+		{
+			fatal_lang_error($e->getMessage(), false);
+		}
+
+		$firstchar = $context['routing']['firstchar'];
+		$secondchar = $context['routing']['secondchar'];
+		$ship_id_chars = ((int) $firstchar > (int) $secondchar) ? $secondchar . '_' . $firstchar : $firstchar . '_' . $secondchar;
+
+		if (!isset($ships[$ship_id_chars]))
+		{
+			fatal_lang_error('shipper_not_found', false);
+		}
+
+		$ship = $ships[$ship_id_chars];
+
+		$epub = new Epub3($ship);
+		$epub->send();
+		die;
 	}
 }

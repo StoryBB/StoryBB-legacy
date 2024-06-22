@@ -880,6 +880,7 @@ $txt['other_ships'] = 'Other shippers with these characters';
 $txt['other_ships_generic'] = 'Other shippers';
 $txt['already_in_timeline'] = 'Already in timeline';
 $txt['add_to_timeline'] = 'Add to timeline';
+$txt['download_ebook'] = 'Download eBook';
 
 $txt['integration_discord_topic'] = 'New topic posted: [{$subject}]({$link})';
 $txt['integration_discord_reply'] = '[{$subject}]({$link}) has a new reply!';

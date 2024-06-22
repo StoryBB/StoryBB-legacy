@@ -19,10 +19,12 @@
 		{{/each}}
 		</div>
 		<span id="top_subject">{{{context.subject}}}</span>
-		{{#if context.is_locked}}<span class="main_icons lock"></span>{{/if}}
-		{{#if context.is_sticky}}<span class="main_icons sticky"></span>{{/if}}
 	</h2>
-	<p>{{txt.started_by}} {{{context.topic_poster_name}}}, {{{context.topic_started_time}}}</p>
+	<p>{{txt.started_by}} {{{context.topic_poster_name}}}, {{{context.topic_started_time}}}
+		{{#if context.is_locked}}<span class="prefix prefix-darkgoldenrod"><span class="main_icons lock"></span> {{{txt.locked_topic}}}</span>{{/if}}
+		{{#if context.is_sticky}}<span class="prefix prefix-darkred"><span class="main_icons sticky"></span> {{{txt.sticky_topic}}}</span>{{/if}}
+		{{#if context.is_finished}}<span class="prefix prefix-seagreen"><span class="main_icons valid"></span> {{{txt.finished_topic}}}</span>{{/if}}
+	</p>
 
 {{#if context.viewing}}
 	<p>{{{context.viewing}}}</p>

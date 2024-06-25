@@ -349,11 +349,6 @@ function TrackIP()
 	if ($context['single_ip'])
 	{
 		$context['whois_servers'] = [
-			'afrinic' => [
-				'name' => $txt['whois_afrinic'],
-				'url' => 'https://www.afrinic.net/cgi-bin/whois?searchtext=' . $context['ip'],
-				'range' => [41, 154, 196],
-			],
 			'apnic' => [
 				'name' => $txt['whois_apnic'],
 				'url' => 'https://wq.apnic.net/apnic-bin/whois.pl?searchtext=' . $context['ip'],
@@ -370,12 +365,12 @@ function TrackIP()
 			],
 			'lacnic' => [
 				'name' => $txt['whois_lacnic'],
-				'url' => 'https://lacnic.net/cgi-bin/lacnic/whois?query=' . $context['ip'],
+				'url' => 'https://query.milacnic.lacnic.net/search?id=' . $context['ip'],
 				'range' => [186, 187, 189, 190, 191, 200, 201],
 			],
 			'ripe' => [
 				'name' => $txt['whois_ripe'],
-				'url' => 'https://apps.db.ripe.net/search/query.html?searchtext=' . $context['ip'],
+				'url' => 'https://apps.db.ripe.net/db-web-ui/query?searchtext=' . $context['ip'],
 				'range' => [62, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95,
 					141, 145, 151, 188, 193, 194, 195, 212, 213, 217],
 			],

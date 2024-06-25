@@ -45,6 +45,10 @@ class CharactersPopup extends AbstractProfileController
 				'icon' => 'fas fa-paste fa-fw',
 			],
 			[
+				'item' => 'bookmarks',
+				'icon' => 'fas fa-bookmark fa-fw',
+			],
+			[
 				'item' => 'group_membership',
 				'icon' => 'fas fa-user-friends fa-fw',
 			],

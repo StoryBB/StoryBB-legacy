@@ -28,6 +28,8 @@ $txt['who_no_online_members'] = 'There are currently no members online.';
 $txt['who_guest_login'] = 'User has been taken to the login page.';
 $txt['who_user_received_error'] = 'User received error message: %1$s';
 
+$txt['user_agent'] = 'User Agent';
+
 $txt['whoall_activate'] = 'Activating their account.';
 $txt['whoall_buddy'] = 'Modifying their buddy list.';
 $txt['whoall_emailuser'] = 'Sending email to another member.';

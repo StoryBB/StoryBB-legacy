@@ -203,6 +203,16 @@ function reqDebugDiv(selector)
 
 	return false;
 }
+function reqInlinePopupDiv(text, sHeader, sIcon)
+{
+	var sIcon = sbb_images_url + '/' + (typeof(sIcon) == 'string' ? sIcon : 'helptopics.png');
+	var sHeader = typeof(sHeader) == 'string' ? sHeader : help_popup_heading_text;
+
+	// Create the div that we are going to load
+	var oContainer = new smc_Popup({heading: sHeader, content: text, icon: sIcon});
+
+	return false;
+}
 
 // Create the popup menus for the top level/user menu area.
 function smc_PopupMenu(oOptions)

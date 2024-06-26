@@ -40,6 +40,9 @@
 							</span>
 	{{#if ip}}
 							(<a href="{{../scripturl}}?action=admin;area=logs;sa=ip{{#unless is_guest}};u={{id}}{{/unless}};searchip={{ip}}">{{ip}}</a>)
+							{{#if user_agent}}
+								<a data-ua="{{{user_agent}}}" data-header="{{../txt.user_agent}}" href="javascript:void(0);" onclick="reqInlinePopupDiv(this.getAttribute('data-ua'), this.getAttribute('data-header'));"><span class="main_icons filter"></span></a>
+							{{/if}}
 	{{/if}}
 						</td>
 						<td class="time">{{time}}</td>

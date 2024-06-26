@@ -276,7 +276,7 @@ class WhosOnline implements Routable
 			{
 				if (allowedTo('admin_forum'))
 				{
-					$context['members'][$i]['title'] = StringLibrary::escape($member['user_agent'], ENT_QUOTES);
+					$context['members'][$i]['user_agent'] = StringLibrary::escape($member['user_agent'], ENT_QUOTES);
 				}
 			}
 

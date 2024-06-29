@@ -661,6 +661,9 @@ class CharacterProfile extends AbstractProfileController
 
 		$context['sub_template'] = 'profile_character_avatar';
 		loadJavascriptFile('chars.js', ['default_theme' => true], 'chars');
+		loadJavaScriptFile('exif-2.3.0.js', ['minimize' => false, 'default_theme' => true], 'exif');
+		loadJavaScriptFile('croppie-2.6.4.min.js', ['minimize' => false, 'default_theme' => true], 'croppie');
+		loadCSSFile('croppie.css', [], 'croppie');
 
 		require_once($sourcedir . '/Subs-Post.php');
 		require_once($sourcedir . '/Profile-Modify.php');
@@ -700,10 +703,6 @@ class CharacterProfile extends AbstractProfileController
 		$context['allowed_extras'] = [];
 
 		$total_allowed_avatars = 5;
-		// echo '<pre>';
-		// var_dump($context['character']['avatar_settings']);
-		// var_dump($context['character']);
-		// die;
 
 		$keys = array_keys($context['character']['additional_avatars']);
 		$extra_avatars = array_values($context['character']['additional_avatars']);
@@ -880,19 +879,6 @@ class CharacterProfile extends AbstractProfileController
 					);
 				}
 
-				if (!empty($_FILES['additional_upload_' . $slot]['tmp_name']))
-				{
-					$sizes = @getimagesize($_FILES['additional_upload_' . $slot]['tmp_name']);
-					if (empty($sizes))
-					{
-						continue;
-					}
-				}
-				else
-				{
-					continue;
-				}
-
 				$extensions = [
 					'1' => 'gif',
 					'2' => 'jpg',
@@ -901,7 +887,29 @@ class CharacterProfile extends AbstractProfileController
 					'18' => 'webp',
 				];
 
-				$extension = isset($extensions[$sizes[2]]) ? $extensions[$sizes[2]] : 'bmp';
+				if (!empty($_FILES['additional_upload_' . $slot]['tmp_name']))
+				{
+					$sizes = @getimagesize($_FILES['additional_upload_' . $slot]['tmp_name']);
+					if (empty($sizes))
+					{
+						continue;
+					}
+
+					$extension = isset($extensions[$sizes[2]]) ? $extensions[$sizes[2]] : 'bmp';
+				}
+				elseif (!empty($_POST['additional_blob']) && is_array($_POST['additional_blob']) && !empty($_POST['additional_blob'][$slot]))
+				{
+					$avatar = validate_string_avatar('additional_blob', $slot);
+
+					[$extension, $image, $width, $height] = $avatar;
+					$sizes = [$width, $height];
+					$temp = $modSettings['custom_avatar_dir'] . '/str_avatar_ ' . $context['character']['id_character'] . '_' . time();
+					file_put_contents($temp, $image);
+				}
+				else
+				{
+					continue;
+				}
 
 				if (!empty($additional_avatar['id']))
 				{

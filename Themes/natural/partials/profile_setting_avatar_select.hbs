@@ -45,17 +45,21 @@
 
 {{! If the user is able to upload avatars to the server show them an upload box. }}
 {{#if context.member.avatar.allow_upload}}
-			<div id="avatar_upload">
-				<input type="file" size="44" name="attachment" id="avatar_upload_box" value="" onchange="readfromUpload(this)"  onfocus="selectRadioByName(document.forms.creator.avatar_choice, 'upload');" accept="image/gif, image/jpeg, image/jpg, image/png">
+
+			<div>
 				{{> max_avatar_size}}
-
-	{{#if context.member.avatar.id_attach}}
-				<br>
-				<img src="{{{context.member.avatar.href}}}" alt="" id="attached_image">
-				<input type="hidden" name="id_attach" value="{{context.member.avatar.id_attach}}">
-	{{/if}}
-
 			</div>
+			<div id="avatar_upload" class="avatar-upload" data-avatar-width="{{ modSettings.avatar_max_width }}" data-avatar-height="{{ modSettings.avatar_max_height }}">
+				<button type="button" onclick="selectRadioByName(document.forms.creator.avatar_choice, 'upload');" class="button upload-button">
+					{{{txt.upload}}}
+					<input type="file" size="44" name="attachment" id="avatar_upload_box" value="" accept="image/*">
+					<input type="hidden" name="imageblob" />
+				</button>
+				
+				<div id="avatar_croppie"></div>
+				{{#if context.member.avatar}}<br><img src="{{{context.member.avatar.href}}}" alt="" id="attached_image">{{/if}}
+			</div>
+
 {{/if}}
 
 			<script>

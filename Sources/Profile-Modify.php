@@ -1390,6 +1390,52 @@ function profileSaveAvatarData(&$value)
 			if (file_exists($_FILES['attachment']['tmp_name']))
 				@unlink($_FILES['attachment']['tmp_name']);
 		}
+		elseif (!empty($_POST['imageblob']))
+		{
+			$avatar = validate_string_avatar('imageblob');
+			if (!empty($avatar))
+			{
+				[$extension, $image, $width, $height] = $avatar;
+				$mime_type = 'image/' . $extension;
+				$destName = 'avatar_' . $context['character']['id_character'] . '_' . time() . '.' . $extension;
+				$file_hash = '';
+
+				// Remove previous attachments this member might have had.
+				removeAttachments(['id_character' => $context['character']['id_character'], 'attachment_type' => 1]);
+
+				$cur_profile['id_attach'] = $smcFunc['db']->insert('',
+					'{db_prefix}attachments',
+					[
+						'id_character' => 'int', 'attachment_type' => 'int', 'filename' => 'string', 'file_hash' => 'string', 'fileext' => 'string', 'size' => 'int',
+						'width' => 'int', 'height' => 'int', 'mime_type' => 'string', 'id_folder' => 'int',
+					],
+					[
+						$context['character']['id_character'], 1, $destName, $file_hash, $extension, strlen($image),
+						(int) $width, (int) $height, $mime_type, $id_folder,
+					],
+					['id_attach'],
+					1
+				);
+
+				$cur_profile['filename'] = $destName;
+				$cur_profile['attachment_type'] = 1;
+
+				$destinationPath = $uploadDir . '/' . (empty($file_hash) ? $destName : $cur_profile['id_attach'] . '_' . $file_hash . '.dat');
+				if (!file_put_contents($destinationPath, $image))
+				{
+					// I guess a man can try.
+					removeAttachments(['id_character' => $context['character']['id_character'], 'attachment_type' => 1]);
+					fatal_lang_error('attach_timeout', 'critical');
+				}
+
+				// Attempt to chmod it.
+				sbb_chmod($uploadDir . '/' . $destinationPath, 0644);
+			}
+			else
+			{
+				$profile_vats['avatar'] = '';
+			}
+		}
 		// Selected the upload avatar option and had one already uploaded before or didn't upload one.
 		else
 			$profile_vars['avatar'] = '';
@@ -1401,6 +1447,38 @@ function profileSaveAvatarData(&$value)
 	$cur_profile['avatar'] = $profile_vars['avatar'];
 
 	return false;
+}
+
+function validate_string_avatar(string $element, ?int $slot = null)
+{
+	global $modSettings;
+
+	$maxWidth = (int) ($modSettings['avatar_max_width'] ?? 200);
+	$maxHeight = (int) ($modSettings['avatar_max_height'] ?? 300);
+
+	// Does it have the expected header?
+	$imagedata = $slot !== null ? ($_POST[$element][$slot] ?? '') : ($_POST[$element] ?? '');
+	if (!preg_match('~^data:image/([a-z]+);base64,~i', $imagedata, $matches))
+	{
+		return false;
+	}
+
+	[, $image] = explode(';base64,', $imagedata, 2);
+	$image = base64_decode($image);
+	$gdimage = @imagecreatefromstring($image);
+	if (!$gdimage)
+	{
+		return false;
+	}
+
+	if (imagesx($gdimage) != $maxWidth || imagesy($gdimage) != $maxHeight)
+	{
+		@imagedestroy($gdimage);
+		return false;
+	}
+
+	@imagedestroy($gdimage);
+	return [$matches[1], $image, $maxWidth, $maxHeight];
 }
 
 /**

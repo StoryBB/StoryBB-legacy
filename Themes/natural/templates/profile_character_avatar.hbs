@@ -3,7 +3,7 @@
 		<h3 class="catbg">{{{context.character.character_name}}} - {{{txt.avatars}}}</h3>
 	</div>
 
-	<div id="profileview" class="roundframe flow_auto">
+	<div id="profileview" class="roundframe flow_auto avatar-upload">
 		<div class="errorbox" id="profile_error"{{#unless context.form_errors}} style="display:none"{{/unless}}>
 			<span>{{{txt.char_editing_error}}}</span>
 			<ul id="list_errors">
@@ -80,9 +80,18 @@
 
 {{! If the user is able to upload avatars to the server show them an upload box. }}
 {{#if context.character.avatar_settings.allow_upload}}
-						<div id="avatar_upload">
-							<input type="file" size="44" name="attachment" id="avatar_upload_box" value="" onchange="readfromUpload(this)" onfocus="selectRadioByName(document.forms.creator.avatar_choice, 'upload');" accept="image/gif, image/jpeg, image/jpg, image/png, image/webp">
+						<div>
 							{{> max_avatar_size}}
+						</div>
+						<div id="avatar_upload" data-avatar-width="{{ modSettings.avatar_max_width }}" data-avatar-height="{{ modSettings.avatar_max_height }}">
+							<button type="button" onclick="selectRadioByName(document.forms.creator.avatar_choice, 'upload');" class="button upload-button">
+								{{{txt.upload}}}
+								<input type="file" size="44" name="attachment" id="avatar_upload_box" value="" accept="image/*">
+								<input type="hidden" name="imageblob" />
+							</button>
+							
+							<div id="avatar_croppie"></div>
+							
 							{{#if context.character.id_attach}}<br><img src="{{{context.character.avatar}}}" alt="" id="attached_image"><input type="hidden" name="id_attach" value="{{context.character.id_attach}}">{{/if}}
 						</div>
 {{/if}}
@@ -175,10 +184,16 @@
 
 	{{! If the user is able to upload avatars to the server show them an upload box. }}
 	{{#if ../context.character.avatar_settings.allow_upload}}
-						<div id="avatar_upload_{{ @index }}">
-							<input type="text" size="44" name="additional_label_upload[{{ @index }}]" value="{{{ this.label }}}">
-							<input type="file" size="44" name="additional_upload_{{ @index }}" id="avatar_upload_box_{{ @index }}" value="" onchange="readAdditionalFromUpload(this, {{ @index }})" accept="image/gif, image/jpeg, image/jpg, image/png, image/webp">
+						<div id="avatar_upload_{{ @index }}" class="upload-container">
 							{{> max_avatar_size modSettings=../modSettings txt=../txt}}
+							<input type="text" size="44" name="additional_label_upload[{{ @index }}]" value="{{{ this.label }}}">
+							<button type="button" class="button upload-button additional-upload" data-index="{{ @index }}">
+								{{{../txt.upload}}}
+								<input type="file" name="additional_upload_{{ @index }}" id="avatar_upload_box_{{ @index }}" value="" accept="image/*">
+								<input type="hidden" name="additional_blob[{{ @index }}]" />
+							</button>
+
+							<div id="avatar_croppie_{{ @index }}" class="avatar-croppie"></div>
 							{{#if (and (eq this.type 'upload') this.id)}}<br><img src="{{{this.preview}}}" alt="" id="attached_image_{{ @index }}">{{/if}}
 						</div>
 

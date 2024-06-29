@@ -48,6 +48,11 @@ class AvatarSignature extends AbstractProfileController
 		$context['page_desc'] = str_replace('{forum_name}', $context['forum_name_html_safe'], $txt['forumProfile_info']);
 		$context['show_preview_button'] = true;
 
+		loadJavascriptFile('chars.js', ['default_theme' => true], 'chars');
+		loadJavaScriptFile('exif-2.3.0.js', ['minimize' => false, 'default_theme' => true], 'exif');
+		loadJavaScriptFile('croppie-2.6.4.min.js', ['minimize' => false, 'default_theme' => true], 'croppie');
+		loadCSSFile('croppie.css', [], 'croppie');
+
 		setupProfileContext(
 			[
 				'avatar_choice', 'hr',

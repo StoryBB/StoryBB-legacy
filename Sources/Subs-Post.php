@@ -33,7 +33,7 @@ function preparsecode(&$message, $previewing = false)
 	$message = preg_replace_callback('~\[nobbc\](.+?)\[/nobbc\]~is', function($a)
 	{
 		return '[nobbc]' . strtr($a[1], ['[' => '&#91;', ']' => '&#93;', ':' => '&#58;', '@' => '&#64;']) . '[/nobbc]';
-	}, $message);
+	}, $message ?? '');
 
 	// Remove \r's... they're evil!
 	$message = strtr($message, ["\r" => '']);

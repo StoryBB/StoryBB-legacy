@@ -901,7 +901,7 @@ function un_htmlspecialchars($string)
 	if (empty($translation))
 		$translation = array_flip(get_html_translation_table(HTML_SPECIALCHARS, ENT_QUOTES, 'UTF-8')) + ['&#039;' => '\'', '&#39;' => '\'', '&nbsp;' => ' '];
 
-	return strtr($string, $translation);
+	return strtr($string ?? '', $translation);
 }
 
 /**

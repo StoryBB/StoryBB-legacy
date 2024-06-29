@@ -13,6 +13,7 @@
 
 use StoryBB\Helper\IP;
 use StoryBB\Helper\Parser;
+use StoryBB\Helper\ShipperLib;
 use StoryBB\Helper\Verification;
 use StoryBB\Model\Bookmark;
 use StoryBB\Model\TopicCollection;
@@ -138,6 +139,43 @@ function Display()
 			);
 		}
 		redirectexit('topic=' . $context['topicinfo']['id_redirect_topic'] . '.0', true);
+	}
+
+	$context['shippers'] = [];
+	if ($board_info['in_character'])
+	{
+		[$shippers, $participating_characters] = ShipperLib::get_shippers();
+
+		foreach ($shippers as $ship)
+		{
+			if (isset($ship['topics'][$topic]))
+			{
+				$timeline = [
+					'previous_topic' => false,
+					'next_topic' => false,
+					'title' => !empty($ship['ship_name']) ? $ship['ship_name'] : '',
+					'label' => $ship['label'],
+				];
+				// So this topic is in the ship, only question is previous/next.
+				$topic_ids = array_keys($ship['topics']);
+				$topic_values = array_values($ship['topics']);
+
+				$position = array_search($topic, $topic_ids);
+
+				$timeline['position'] = sprintf($txt['topic_x_of_y'], $position + 1, count($topic_ids));
+
+				if ($position > 0)
+				{
+					$timeline['previous_topic'] = $topic_values[$position - 1];
+				}
+				if (isset($topic_values[$position + 1]))
+				{
+					$timeline['next_topic'] = $topic_values[$position + 1];
+				}
+
+				$context['shippers'][] = $timeline;
+			}
+		}
 	}
 
 	// Short-cut to know if this user can see unapproved messages.

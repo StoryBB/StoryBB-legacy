@@ -32,6 +32,31 @@
 
 </div>
 
+{{#if context.shippers}}
+	{{#each context.shippers}}
+		<div class="topic-timeline">
+			<span class="previous">
+				{{#if this.previous_topic}}
+					<a href="{{{ previous_topic.topic_href }}}">{{{ ../txt.previous_chapter }}}</a>
+				{{/if}}
+			</span>
+
+			<span class="timeline-name">
+				{{#if title}}{{{ title }}} / {{/if}}
+				{{{ label }}}
+				<br>
+				{{{ position }}}
+			</span>
+
+			<span class="next">
+				{{#if this.next_topic}}
+					<a href="{{{ next_topic.topic_href }}}">{{{ ../txt.next_chapter }}}</a>
+				{{/if}}
+			</span>
+		</div>
+	{{/each}}
+{{/if}}
+
 {{! Show the anchor for the top and for the first message. If the first message is new, say so. }}
 <a id="msg{{context.first_message}}"></a>
 {{#if context.first_new_message}}<a id="new"></a>{{/if}}

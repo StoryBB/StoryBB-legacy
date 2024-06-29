@@ -143,7 +143,6 @@ class CurrentUser
 			$time_system = new DateTime('now', $tz_system);
 			$time_user = new DateTime('now', $tz_user);
 			$this->user_data['final_time_offset'] = ($tz_user->getOffset($time_user) - $tz_system->getOffset($time_system)) / 3600;
-			header('X-Debug-Tz: ' . json_encode([$tz_system, $tz_user, $time_system, $time_user, $this->user_data['final_time_offset']]));
 		}
 		else
 		{

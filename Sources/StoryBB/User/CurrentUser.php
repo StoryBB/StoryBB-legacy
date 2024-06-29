@@ -15,6 +15,8 @@ namespace StoryBB\User;
 use RuntimeException;
 use StoryBB\Dependency\Database;
 use StoryBB\Dependency\SiteSettings;
+use DateTimeZone;
+use DateTime;
 
 class CurrentUser
 {
@@ -77,6 +79,7 @@ class CurrentUser
 				'authenticated' => false,
 				'groups' => [self::GROUP_GUEST],
 				'time_offset' => 0,
+				'final_time_offset' => 0,
 				'theme' => (int) $this->sitesettings()->theme_guests,
 			];
 		}
@@ -122,9 +125,9 @@ class CurrentUser
 
 	public function get_time_offset(): int
 	{
-		if (isset($this->user_data['time_offset']))
+		if (isset($this->user_data['final_time_offset']))
 		{
-			return $this->user_data['time_offset'];
+			return $this->user_data['final_time_offset'];
 		}
 
 		if (empty($this->user_data))
@@ -139,12 +142,15 @@ class CurrentUser
 			$tz_user = new DateTimeZone($this->user_data['timezone']);
 			$time_system = new DateTime('now', $tz_system);
 			$time_user = new DateTime('now', $tz_user);
-			$this->user_data['time_offset'] = ($tz_user->getOffset($time_user) - $tz_system->getOffset($time_system)) / 3600;
+			$this->user_data['final_time_offset'] = ($tz_user->getOffset($time_user) - $tz_system->getOffset($time_system)) / 3600;
+			header('X-Debug-Tz: ' . json_encode([$tz_system, $tz_user, $time_system, $time_user, $this->user_data['final_time_offset']]));
 		}
 		else
 		{
-			$this->user_data['time_offset'] = 0;
+			$this->user_data['final_time_offset'] = 0;
 		}
+
+		return $this->user_data['final_time_offset'];
 	}
 
 	public function is_immersive_mode(): bool

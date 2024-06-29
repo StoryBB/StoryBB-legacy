@@ -54,6 +54,8 @@ class DailyMaintenance extends \StoryBB\Task\AbstractSchedulable implements \Sto
 
 		$this->prune_minified_css();
 
+		$this->prune_todo();
+
 		// Do the birthday achievements.
 		$achievement = new Achievement;
 		$achievement->trigger_award_achievement('AccountBirthday');
@@ -180,5 +182,21 @@ class DailyMaintenance extends \StoryBB\Task\AbstractSchedulable implements \Sto
 
 			@unlink($file);
 		}
+	}
+
+	/**
+	 * Clean up any old todo items.
+	 */
+	protected function prune_todo()
+	{
+		global $smcFunc, $modSettings;
+
+		// Clean up some old login history information.
+		$smcFunc['db']->query('', '
+			DELETE FROM {db_prefix}todo
+			WHERE completed_at > 0 AND completed_at < {int:old}',
+			[
+				'old' => time() - (86400 * 3),
+		]);
 	}
 }

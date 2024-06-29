@@ -3180,6 +3180,33 @@ dl.stats dd span {
 	margin-bottom: 0.25em;
 }
 
+.topic-timeline {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	background: $default-background;
+	border: 1px solid $primary-accent;
+	padding: 6px;
+
+	&> span {
+		flex-basis: 33%;
+	}
+	span.timeline-name {
+		text-align: center;
+	}
+	span.next {
+		text-align: right;
+	}
+}
+@media screen and (max-width: 767px) {
+	.topic-timeline {
+		flex-direction: column;
+		&> span {
+			width: 100%;
+		}
+	}
+}
+
 #alerts tr.windowbg td {
 	border-right: 1px solid $primary-border;
 }

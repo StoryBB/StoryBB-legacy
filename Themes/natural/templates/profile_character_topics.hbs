@@ -1,0 +1,28 @@
+		{{! Showing a character's topics }}
+		<div class="cat_bar profile">
+			<h3 class="catbg">
+				{{{context.character.character_name}}} - {{{txt.showTopics}}}
+			</h3>
+		</div>
+
+		<div class="windowbg">
+{{#each context.topics}}
+			<div class="topic_details">
+				<h5><strong><a href="{{{board.link}}}">{{{board.name}}}</a> / <a href="{{link}}">{{#each prefixes}}<span class="{{{css_class}}}">{{{name}}}</span>{{/each}}{{{subject}}}</a></strong></h5>
+
+				<div class="participants">
+				{{#each participants}}
+					{{#unless invite}}
+					<img class="avatar" src="{{{ this.avatar.href }}}" title="{{{ name }}}">
+					{{/unless}}
+				{{/each}}
+				</div>
+			</div>
+{{/each}}
+		</div>
+
+{{#unless context.topics}}
+		<div class="windowbg">
+			{{{txt.show_topics_none}}}
+		</div>
+{{/unless}}

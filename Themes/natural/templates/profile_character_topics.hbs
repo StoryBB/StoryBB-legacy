@@ -19,6 +19,14 @@
 				</div>
 			</div>
 {{/each}}
+
+{{#if context.download_links}}
+			<div class="buttonlist floatright">
+	{{#each context.download_links}}
+				<a href="{{ . }}" class="button">{{ @key }}</a>
+	{{/each}}
+			</div>
+{{/if}}
 		</div>
 
 {{#unless context.topics}}

@@ -16,6 +16,7 @@ use StoryBB\App;
 use StoryBB\Helper\Parser;
 use StoryBB\Model\TopicCollection;
 use StoryBB\Model\TopicPrefix;
+use StoryBB\Helper\Epub\Epub3;
 
 class CharacterTopics extends AbstractProfileController
 {
@@ -100,5 +101,61 @@ class CharacterTopics extends AbstractProfileController
 				}
 			}
 		}
+
+		if (!empty($context['topics']))
+		{
+			switch ($_GET['download'] ?? '')
+			{
+				case 'epub':
+					$this->export_epub();
+					break;
+			}
+
+			if (!$context['user']['is_guest'])
+			{
+				$context['download_links'] = [
+					$txt['download_ebook'] => $scripturl . '?action=profile;u=' . $context['id_member'] . ';area=character_topics;char=' . $context['character']['id_character'] . ';download=epub',
+				];
+			}
+		}
+	}
+
+	public function export_epub()
+	{
+		global $context, $scripturl;
+
+		is_not_guest();
+
+		$ship = [
+			'characters' => [],
+			'topics' => [],
+			'show' => true,
+			'editable' => false,
+			'label' => $context['character']['character_name'],
+		];
+
+		$ship['characters'][$context['character']['id_character']] = $context['character']['character_name'];
+
+		$position = 1;
+		foreach ($context['topics'] as $topic_id => $topic)
+		{
+			foreach ($topic['participants'] as $id_character => $character)
+			{
+				if (empty($character['invite']))
+				{
+					$ship['characters'][$id_character] = $character['name'];
+				}
+			}
+			$ship['topics'][$topic_id] = [
+				'subject' => $topic['subject'],
+				'position' => $position++,
+				'topic_href' => $scripturl . '?topic=' . $topic_id . '.0',
+				'prefixes' => $topic['prefixes'],
+			];
+		}
+
+		$epub = new Epub3($ship);
+		$epub->send();
+		die;
 	}
 }

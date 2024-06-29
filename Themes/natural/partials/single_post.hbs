@@ -45,6 +45,10 @@
 				</li>
 {{/if}}
 
+{{#if member.played_by}}
+				<li class="played-by">{{textTemplate ../txt.played_by member.played_by}}</li>
+{{/if}}
+
 {{#if (not member.is_guest)}}
 				<li class="icons">{{{member.group_icons}}}</li>
 {{/if}}

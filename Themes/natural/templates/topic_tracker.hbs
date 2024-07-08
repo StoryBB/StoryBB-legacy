@@ -39,6 +39,133 @@
 		</div>
 		<br>
 
+		{{! Topic invites }}
+{{#if context.invites.received}}
+		<div class="cat_bar">
+			<h3 class="catbg">
+				{{{ txt.received_invites }}}
+			</h3>
+		</div>
+
+		<div class="topic-list topic-tracker">
+	{{#each context.invites.received}}
+			<div class="{{css_class}} topic-ic">
+				<div class="topic-subject">
+		{{#if (and new ../context.user.is_logged)}}
+					<a href="{{new_href}}" id="newicon{{first_post.id}}" class="new_posts" title="{{txt.new_posts}}"></a>
+		{{/if}}
+					<span class="preview{{#if is_sticky}} bold_text{{/if}}" title="{{#if message_index_preview_first}}{{{first_post.preview}}}{{else}}{{{last_post.preview}}}{{/if}}">
+
+						{{#each prefixes}}
+							<a href="{{{filter_link}}}"><span class="{{{css_class}}}">{{{name}}}</span></a>
+						{{/each}}
+						<span id="msg_{{first_post.id}}">
+							{{{first_post.link}}}{{#unless approved}}&nbsp;<em>({{txt.awaiting_approval}})</em>{{/unless}}
+						</span>
+					</span>
+				</div>
+
+				<div class="topic-starter" data-started-by="{{txt.started_by}}">
+					{{{first_post.member.link}}}
+					{{#if pages}}<span id="pages{{first_post.id}}" class="topic_pages">&nbsp;{{{pages}}}</span>{{/if}}
+				</div>
+
+				<div class="icons">
+					{{#if is_watched}}<span class="main_icons watch" title="{{txt.watching_this_topic}}"></span>{{/if}}
+					{{#if is_locked}}<span class="main_icons lock" title="{{txt.locked_topic}}"></span>{{/if}}
+					{{#if is_sticky}}<span class="main_icons sticky" title="{{txt.sticky_topic}}"></span>{{/if}}
+					{{#if is_redirect}}<span class="main_icons move" title="{{txt.moved_topic}}"></span>{{/if}}
+					{{#if is_poll}}<span class="main_icons poll" title="{{txt.poll}}"></span>{{/if}}
+				</div>
+
+				<div class="replies">
+					<p>{{replies}} {{../txt.replies}}</p>
+					{{#if has_draft}}
+						<a href="{{{draft_link}}}"><span class="prefix prefix-tertiary">{{{txt.has_draft}}}</span></a>
+					{{/if}}
+				</div>
+				<div class="last-post">
+					{{{ invited.name }}}
+				</div>
+
+				<div class="participants">
+					<form action="{{{ ../context.invites.url }}}" method="post">
+						<input type="hidden" name="invite" value="recd">
+						<input type="hidden" name="topic" value="{{ @key }}">
+						<input type="hidden" name="character" value="{{ invited.id }}">
+						<button class="button">{{{ ../txt.cancel_invite }}}</button>
+						{{ session_form }}
+					</form>
+				</div>
+			</div>
+	{{/each}}
+		</div>
+		<br>
+{{/if}}
+
+{{#if context.invites.sent}}
+		<div class="cat_bar">
+			<h3 class="catbg">
+				{{{ txt.sent_invites }}}
+			</h3>
+		</div>
+
+		<div class="topic-list topic-tracker">
+	{{#each context.invites.sent}}
+			<div class="{{css_class}} topic-ic">
+				<div class="topic-subject">
+		{{#if (and new ../context.user.is_logged)}}
+					<a href="{{new_href}}" id="newicon{{first_post.id}}" class="new_posts" title="{{txt.new_posts}}"></a>
+		{{/if}}
+					<span class="preview{{#if is_sticky}} bold_text{{/if}}" title="{{#if message_index_preview_first}}{{{first_post.preview}}}{{else}}{{{last_post.preview}}}{{/if}}">
+
+						{{#each prefixes}}
+							<a href="{{{filter_link}}}"><span class="{{{css_class}}}">{{{name}}}</span></a>
+						{{/each}}
+						<span id="msg_{{first_post.id}}">
+							{{{first_post.link}}}{{#unless approved}}&nbsp;<em>({{txt.awaiting_approval}})</em>{{/unless}}
+						</span>
+					</span>
+				</div>
+
+				<div class="topic-starter" data-started-by="{{txt.started_by}}">
+					{{{first_post.member.link}}}
+					{{#if pages}}<span id="pages{{first_post.id}}" class="topic_pages">&nbsp;{{{pages}}}</span>{{/if}}
+				</div>
+
+				<div class="icons">
+					{{#if is_watched}}<span class="main_icons watch" title="{{txt.watching_this_topic}}"></span>{{/if}}
+					{{#if is_locked}}<span class="main_icons lock" title="{{txt.locked_topic}}"></span>{{/if}}
+					{{#if is_sticky}}<span class="main_icons sticky" title="{{txt.sticky_topic}}"></span>{{/if}}
+					{{#if is_redirect}}<span class="main_icons move" title="{{txt.moved_topic}}"></span>{{/if}}
+					{{#if is_poll}}<span class="main_icons poll" title="{{txt.poll}}"></span>{{/if}}
+				</div>
+
+				<div class="replies">
+					<p>{{replies}} {{../txt.replies}}</p>
+					{{#if has_draft}}
+						<a href="{{{draft_link}}}"><span class="prefix prefix-tertiary">{{{txt.has_draft}}}</span></a>
+					{{/if}}
+				</div>
+				<div class="last-post">
+					{{{ invited.name }}}
+				</div>
+
+				<div class="participants">
+					<form action="{{{ ../context.invites.url }}}" method="post">
+						<input type="hidden" name="invite" value="sent">
+						<input type="hidden" name="topic" value="{{ @key }}">
+						<input type="hidden" name="character" value="{{ invited.id }}">
+						<button class="button">{{{ ../txt.decline_invite }}}</button>
+						{{ session_form }}
+					</form>
+				</div>
+			</div>
+	{{/each}}
+		</div>
+		<br>
+{{/if}}
+
 		{{! Displaying character topics in a holistic way.}}
 		<div class="cat_bar">
 			<h3 class="catbg">

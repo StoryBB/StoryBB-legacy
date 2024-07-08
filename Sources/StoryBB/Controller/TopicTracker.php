@@ -26,6 +26,7 @@ class TopicTracker implements Routable
 	{
 		$routes->add('topictracker', (new Route('/topic-tracker', ['_function' => [static::class, 'display_action']])));
 		$routes->add('todolist', (new Route('/topic-tracker/todo', ['_function' => [static::class, 'post_action']])));
+		$routes->add('remove-invite', (new Route('/topic-tracker/remove-invite', ['_function' => [static::class, 'remove_invite']])));
 	}
 
 	public static function display_action()
@@ -318,6 +319,7 @@ class TopicTracker implements Routable
 					'time' => timeformat($row['first_poster_time']),
 					'timestamp' => forum_time(true, $row['first_poster_time']),
 					'member' => [
+						'id' => $row['id_member'],
 						'link' => empty($row['id_member']) ? $row['real_name_col'] : '<a href="' . $scripturl . '?action=profile;u=' . $row['id_member'] . (empty($row['started_ooc']) && !empty($row['started_char']) ? ';area=characters;char=' . $row['started_char'] : '') . '">' . $row['real_name_col'] . '</a>',
 					],
 					'preview' => '',
@@ -400,6 +402,48 @@ class TopicTracker implements Routable
 				$context['user']['characters'][$id_character]['topics'][$id_topic]['css_class'] .= (!empty($topic['invite']) ? ' invitedtopic' : ' postedtopic');
 			}
 		}
+
+		// Work out final invite status.
+		$context['invites'] = [
+			'sent' => [],
+			'received' => [],
+		];
+
+		foreach ($context['user']['characters'] as $id_character => $character)
+		{
+			if (empty($character['topics']))
+			{
+				continue;
+			}
+			foreach ($character['topics'] as $topic_id => $topic)
+			{
+				if (!empty($topic['participants']))
+				{
+					foreach ($topic['participants'] as $participant_character_id => $participant)
+					{
+						if (!empty($participant['invite']))
+						{
+							$invite_type = isset($context['user']['characters'][$participant_character_id]['id_character']) ? 'received' : 'sent';
+							$context['invites'][$invite_type][$topic_id] = $topic;
+							$context['invites'][$invite_type][$topic_id]['invited'] = [
+								'id' => $participant_character_id,
+								'name' => $topic['participants'][$participant_character_id]['name'],
+							];
+						}
+					}
+				}
+			}
+		}
+
+		foreach ($context['invites']['sent'] as $index => $invite)
+		{
+			if ($invite['first_post']['member']['id'] != $context['user']['id'])
+			{
+				unset($context['invites']['sent'][$index]);
+			}
+		}
+
+		$context['invites']['url'] = $url->generate('remove-invite');
 	}
 
 	public static function post_action()
@@ -456,6 +500,67 @@ class TopicTracker implements Routable
 					'notdone' => 0,
 				]
 			);
+		}
+
+		$url = App::container()->get('urlgenerator');
+		redirectexit($url->generate('topictracker'));
+	}
+
+	public static function remove_invite()
+	{
+		global $context, $smcFunc, $user_info, $memberContext;
+		is_not_guest();
+		checkSession();
+
+		$type = $_POST['invite'] ?? '';
+		$topic = isset($_POST['topic']) ? (int) $_POST['topic'] : 0;
+		$character = isset($_POST['character']) ? (int) $_POST['character'] : 0;
+
+		if ($type == 'recd')
+		{
+			// We want to verify the character is ours.
+			loadMemberData($context['user']['id']);
+			loadMemberContext($context['user']['id']);
+			if (isset($memberContext[$context['user']['id']]['characters'][$character]))
+			{
+				$smcFunc['db']->query('', '
+					DELETE FROM {db_prefix}topic_invites
+					WHERE id_topic = {int:topic}
+						AND id_character = {int:character}',
+					[
+						'topic' => $topic,
+						'character' => $character,
+					]
+				);
+			}
+		}
+		elseif ($type == 'sent')
+		{
+			$request = $smcFunc['db']->query('', '
+				SELECT COUNT(id_topic)
+				FROM {db_prefix}topics
+				WHERE id_topic = {int:topic}
+					AND id_member_started = {int:member}',
+				[
+					'topic' => $topic,
+					'member' => $context['user']['id'],
+				]
+			);
+			[$topic_count] = $smcFunc['db']->fetch_row($request);
+			$smcFunc['db']->free_result($request);
+
+			if ($topic_count)
+			{
+				$smcFunc['db']->query('', '
+					DELETE FROM {db_prefix}topic_invites
+					WHERE id_topic = {int:topic}
+						AND id_character = {int:character}',
+					[
+						'topic' => $topic,
+						'character' => $character,
+					]
+				);
+			}
 		}
 
 		$url = App::container()->get('urlgenerator');

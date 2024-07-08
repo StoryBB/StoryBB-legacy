@@ -704,6 +704,10 @@ $txt['order_sticky'] = 'Re-Order Sticky Posts';
 
 $txt['alerts'] = 'Alerts';
 $txt['topic_tracker'] = 'Topic Tracker';
+$txt['received_invites'] = 'Received Invitations';
+$txt['sent_invites'] = 'Sent Invites';
+$txt['cancel_invite'] = 'Cancel';
+$txt['decline_invite'] = 'Decline';
 
 $txt['pm_short'] = 'My Messages';
 $txt['pm_menu_read'] = 'Read your messages';

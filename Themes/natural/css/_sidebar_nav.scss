@@ -32,7 +32,7 @@
 	#characters_menu {
 		left: -140px;
 	}
-	.navigation-item #alerts_menu {
+	.navigation-item #alerts_menu, .navigaion-item #a11y-menu {
 		left: -213px;
 		right: auto;
 		max-width: 320px;
@@ -110,6 +110,11 @@
 }
 
 #alerts_menu {
+	top: 70px;
+	left: auto;
+	right: 0;
+}
+#a11y_menu {
 	top: 70px;
 	left: auto;
 	right: 0;

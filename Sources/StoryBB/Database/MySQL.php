@@ -488,7 +488,7 @@ class MySQL implements DatabaseAdapter
 
 		if (filter_var($error_array[2], FILTER_VALIDATE_IP) !== false)
 		{
-			$error_array[2] = sprintf('unhex(\'%1$s\')', IP::pack_hex($error_array[2]));
+			$error_array[2] = bin2hex(inet_pton($error_array[2]));
 		}
 		else
 		{
@@ -877,7 +877,7 @@ class MySQL implements DatabaseAdapter
 					elseif (IP::is_valid($replacement))
 					{
 						// We don't use the native support of mysql > 5.6.2
-						return sprintf('unhex(\'%1$s\')', IP::pack_hex($replacement));
+						return sprintf('unhex(\'%1$s\')', bin2hex(inet_pton($replacement)));
 					}
 					else
 					{

@@ -19,10 +19,16 @@
 				<div class="infobox success">{{{txt.todo_no_items}}}</div>
 			{{/unless}}
 			{{#if context.todo}}
+				{{#if context.reordering}}
+				<div class="floatright">
+					<button type="button" class="button" id="reorder">{{txt.todo_reorder}}</button>
+					<button type="button" class="button active" style="display:none" id="save_reorder">{{txt.save}}</button>
+				</div>
+				{{/if}}
 				<form action="{{ context.todo_url }}" method="post" accept-charset="UTF-8">
 					<ul class="todo">
 					{{#each context.todo}}
-						<li>
+						<li class="{{#if (gt completed_at 0)}}finished{{else}}unfinished{{/if}}" data-id="{{ id_todo }}">
 							{{#if prefix}}<span class="{{prefix.class}}">{{prefix.label}}</span>{{/if}}
 							<span class="{{ class }}">{{ item }}</span>
 							{{#if (gt completed_at 0)}}
@@ -319,4 +325,35 @@
 			}
 		]
 	});
+
+	{{#if context.reordering}}
+	$('#reorder').on('click', function() {
+		$('#reorder').hide();
+		$('#save_reorder').show();
+		$('.todo button').hide();
+		$('.todo .unfinished .draggable-handle').remove();
+		$('.todo .unfinished').prepend('<span class="draggable-handle">');
+		$('.todo').sortable({
+			items: ".unfinished",
+			handle: ".draggable-handle",
+			update: function (event, ui) {
+				console.log($(this));
+			}
+		});	
+	});
+	$('#save_reorder').on('click', function() {
+		var order = [];
+		$('.todo .unfinished').each(function() {
+			order.push($(this).data('id'));
+		});
+		var url = {{{json context.reorder_url}}};
+		var data = {};
+		data[sbb_session_var] = sbb_session_id;
+		data['order[]'] = order;
+		$.post(url, data)
+			.done(function() { window.location.reload(); })
+			.fail(function() { alert("There was a problem saving your new order."); });
+	});
+
+	{{/if}}
 </script>

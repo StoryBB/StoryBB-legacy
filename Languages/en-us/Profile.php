@@ -103,6 +103,7 @@ $txt['todo_add_item'] = 'Add item';
 $txt['todo_add'] = 'Add';
 $txt['todo_mark_done'] = 'Mark done';
 $txt['todo_mark_not_done'] = 'Mark not done';
+$txt['todo_reorder'] = 'Reorder List';
 
 $txt['no_profile_edit'] = 'You are not allowed to change this person\'s profile.';
 $txt['signature'] = 'Signature';

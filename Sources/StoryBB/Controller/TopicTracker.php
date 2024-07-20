@@ -26,6 +26,7 @@ class TopicTracker implements Routable
 	{
 		$routes->add('topictracker', (new Route('/topic-tracker', ['_function' => [static::class, 'display_action']])));
 		$routes->add('todolist', (new Route('/topic-tracker/todo', ['_function' => [static::class, 'post_action']])));
+		$routes->add('todolist-reorder', (new Route('/topic-tracker/reorder', ['_function' => [static::class, 'reorder']])));
 		$routes->add('remove-invite', (new Route('/topic-tracker/remove-invite', ['_function' => [static::class, 'remove_invite']])));
 	}
 
@@ -52,7 +53,7 @@ class TopicTracker implements Routable
 
 		// Get the todo items.
 		$request = $smcFunc['db']->query('', '
-			SELECT id_todo, item, created_at, completed_at
+			SELECT id_todo, item, position, created_at, completed_at
 			FROM {db_prefix}todo
 			WHERE id_member = {int:member}',
 			[
@@ -60,16 +61,25 @@ class TopicTracker implements Routable
 			]
 		);
 		$todo = [];
+		$open_items = 0;
 		while ($row = $smcFunc['db']->fetch_assoc($request))
 		{
 			$todo[] = $row;
 		}
 		$smcFunc['db']->free_result($request);
+
 		usort($todo, function($a, $b) {
 			if (empty($a['completed_at']) && empty($b['completed_at']))
 			{
 				// Neither completed, return whichever was made first.
-				return $a['created_at'] <=> $b['created_at'];
+				if (empty($a['position']) || empty($b['position']))
+				{
+					return $a['created_at'] <=> $b['created_at'];
+				}
+				else
+				{
+					return (int) $a['position'] <=> (int) $b['position'];
+				}
 			}
 			elseif (empty($a['completed_at']))
 			{
@@ -90,6 +100,9 @@ class TopicTracker implements Routable
 		foreach ($todo as $todoitem)
 		{
 			$class = !empty($todoitem['completed_at']) ? 'completed' : 'active';
+			if (empty($todoitem['completed_at'])) {
+				$open_items++;
+			}
 			if (!empty($todoitem['completed_at']))
 			{
 				$time = time() - $todoitem['completed_at'];
@@ -107,6 +120,7 @@ class TopicTracker implements Routable
 				'Lore' => 'prefix prefix-royalblue',
 				'Wiki' => 'prefix prefix-seagreen',
 				'Forum' => 'prefix prefix-indigo',
+				'Post' => 'prefix prefix-primary',
 			];
 
 			foreach ($prefixes as $prefix => $prefix_class)
@@ -125,6 +139,14 @@ class TopicTracker implements Routable
 			$context['todo'][$todoitem['id_todo']] = $todoitem;
 		}
 		$context['todo_url'] = $url->generate('todolist');
+
+		if ($open_items > 1)
+		{
+			loadJavascriptFile('jquery-ui-1.12.1-sortable.min.js', ['default_theme' => true]);
+			loadJavascriptFile('jquery-ui-touch-punch-0.2.3.min.js', ['default_theme' => true]);
+			$context['reordering'] = true;
+			$context['reorder_url'] = $url->generate('todolist-reorder');
+		}
 
 		$context['time_ago_options'] = [
 			'1week' => ['timestamp' => strtotime('-1 week'), 'label' => $txt['topic_tracker_last_post_1week']],
@@ -488,14 +510,30 @@ class TopicTracker implements Routable
 		elseif (!empty($_POST['undo']))
 		{
 			$id = abs((int) $_POST['undo']);
+
+			$request = $smcFunc['db']->query('', '
+				SELECT MAX(position)
+				FROM {db_prefix}todo
+				WHERE id_member = {int:member}
+					AND completed_at = {int:notdone}',
+				[
+					'member' => $context['user']['id'],
+					'notdone' => 0,
+				]
+			);
+			[$max] = $smcFunc['db']->fetch_row($request);
+			$smcFunc['db']->free_result($request);
+
 			$smcFunc['db']->query('', '
 				UPDATE {db_prefix}todo
-				SET completed_at = {int:notdone}
+				SET completed_at = {int:notdone},
+					position = {int:max}
 				WHERE id_member = {int:member}
 					AND id_todo = {int:todo}
 					AND completed_at != {int:notdone}',
 				[
 					'member' => $context['user']['id'],
+					'max' => $max + 1,
 					'todo' => $id,
 					'notdone' => 0,
 				]
@@ -504,6 +542,45 @@ class TopicTracker implements Routable
 
 		$url = App::container()->get('urlgenerator');
 		redirectexit($url->generate('topictracker'));
+	}
+
+	public static function reorder()
+	{
+		global $context, $smcFunc;
+		is_not_guest();
+		checkSession();
+
+		$position = 1;
+		if (isset($_POST['order']) && is_array($_POST['order']))
+		{
+			foreach ($_POST['order'] as $item)
+			{
+				$item = (int) $item;
+				if ($item <= 0)
+				{
+					continue;
+				}
+
+				$smcFunc['db']->query('', '
+					UPDATE {db_prefix}todo
+					SET position = {int:position}
+					WHERE id_member = {int:member}
+						AND id_todo = {int:todo}
+						AND completed_at = {int:notdone}',
+					[
+						'member' => $context['user']['id'],
+						'position' => $position,
+						'todo' => $item,
+						'notdone' => 0,
+					]
+				);
+
+				$position++;
+			}
+		}
+
+		sbb_serverResponse('{}');
+		die;
 	}
 
 	public static function remove_invite()

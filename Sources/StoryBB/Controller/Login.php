@@ -93,7 +93,7 @@ class Login implements Routable, MaintenanceAccessible
 		// Are they already logged in?
 		if ($this->session()->get('userid'))
 		{
-			return new RedirectResponse('/');
+			return new RedirectResponse(App::get_global_config_item('boardurl'));
 		}
 
 		$request = $this->requestvars();
@@ -183,7 +183,7 @@ class Login implements Routable, MaintenanceAccessible
 
 	protected function get_post_login_redirect()
 	{
-		$redirecturl = '/';
+		$redirecturl = App::get_global_config_item('boardurl');
 
 		// Needs to be a real URL.
 		$session = $this->session();
@@ -192,7 +192,7 @@ class Login implements Routable, MaintenanceAccessible
 			$redirecturl = $session->get('login_url');
 			if (strpos($redirecturl, 'http://') === false && strpos($redirecturl, 'https://') === false)
 			{
-				$redirecturl = '/';
+				$redirecturl = App::get_global_config_item('boardurl');
 			}
 		}
 

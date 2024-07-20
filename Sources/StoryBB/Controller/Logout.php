@@ -50,7 +50,7 @@ class Logout implements Routable, MaintenanceAccessible
 				// Destroy the session, and return it to being a normal short-lived session cookie.
 				$this->session()->invalidate();
 
-				$response = new RedirectResponse('/');
+				$response = new RedirectResponse(App::get_global_config_item('boardurl'));
 
 				$container = Container::instance();
 				$persist_cookie = App::get_global_config_item('cookiename') . '_persist';

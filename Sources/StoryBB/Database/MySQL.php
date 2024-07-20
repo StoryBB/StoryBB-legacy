@@ -674,17 +674,21 @@ class MySQL implements DatabaseAdapter
 			return $db_string;
 		}
 
-		if (empty($db_unbuffered))
-		{
-			$ret = @mysqli_query($this->connection, $db_string);
-		}
-		else
-		{
-			$ret = @mysqli_query($this->connection, $db_string, MYSQLI_USE_RESULT);
-		}
+		try {
+			if (empty($db_unbuffered))
+			{
+				$ret = @mysqli_query($this->connection, $db_string);
+			}
+			else
+			{
+				$ret = @mysqli_query($this->connection, $db_string, MYSQLI_USE_RESULT);
+			}
+		} catch (\Exception $e) {
+			if (!empty($db_values['db_error_skip']))
+			{
+				return false;
+			}
 
-		if ($ret === false && empty($db_values['db_error_skip']))
-		{
 			$ret = $this->error($db_string, $this->connection);
 		}
 

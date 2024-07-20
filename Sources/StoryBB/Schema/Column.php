@@ -311,7 +311,10 @@ class Column
 		{
 			throw new InvalidColumnTypeException($this->column['type'] . ' cannot have a size');
 		}
-		$this->column['size'] = $size;
+		if ($size > 0) 
+		{
+			$this->column['size'] = $size;
+		}
 
 		return $this;
 	}

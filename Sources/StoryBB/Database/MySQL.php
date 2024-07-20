@@ -1583,10 +1583,11 @@ class MySQL implements DatabaseAdapter
 		);
 		while ($row = $this->fetch_assoc($result))
 		{
-			if (preg_match('~(.+?)\s*\((\d+)\)(?:(?:\s*)?(unsigned))?~i', $row['Type'], $matches) === 1)
+			if (preg_match('~([a-z]+)\s*(\s+|\((\d+)\))?(?:(?:\s*)?(unsigned))?~i', $row['Type'], $matches) === 1)
 			{
 				$type = $matches[1];
-				$size = (int) $matches[2];
+				$size = (int) ($matches[3] ?? 0);
+				$unsigned = !empty($matches[4]) && $matches[4] == 'unsigned';
 
 				switch ($type)
 				{
@@ -1598,7 +1599,7 @@ class MySQL implements DatabaseAdapter
 						$columns[$row['Field']] = Column::$type()->size($size);
 
 						$signed = true;
-						if (!empty($matches[3]) && $matches[3] == 'unsigned')
+						if ($unsigned)
 						{
 							$signed = false;
 						}
@@ -1637,8 +1638,45 @@ class MySQL implements DatabaseAdapter
 						}
 						break;
 
+					case 'float':
+						$columns[$row['Field']] = Column::float();
+						if ($row['Null'] == 'YES')
+						{
+							$columns[$row['Field']]->nullable();
+						}
+						if (isset($row['Default']))
+						{
+							$columns[$row['Field']]->default($row['Default']);
+						}
+						break;
+
+					case 'text':
+					case 'mediumtext':
+					case 'blob':
+					case 'mediumblob':
+						$type = $row['Type'];
+						$columns[$row['Field']] = Column::$type();
+
+						if ($row['Null'] == 'YES')
+						{
+							$columns[$row['Field']]->nullable();
+						}
+						break;
+
+					case 'date':
+						$columns[$row['Field']] = Column::date();
+						if ($row['Null'] == 'YES')
+						{
+							$columns[$row['Field']]->nullable();
+						}
+						if (isset($row['Default']))
+						{
+							$columns[$row['Field']]->default($row['Default']);
+						}
+						break;
+
 					default:
-						throw new InvalidColumnTypeException('Unknown column type ' . $type);
+						throw new InvalidColumnTypeException('Unknown column type ' . $row['Type'] . ' in ' . $real_table_name);
 				}
 			}
 			else
@@ -1683,7 +1721,7 @@ class MySQL implements DatabaseAdapter
 						break;
 
 					default:
-						throw new InvalidColumnTypeException('Unknown column type ' . $row['Type']);
+						throw new InvalidColumnTypeException('Unknown column type ' . $row['Type'] . ' in ' . $real_table_name);
 				}
 			}
 		}

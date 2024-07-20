@@ -184,7 +184,7 @@ function sbb_main()
 		return 'InMaintenance';
 	}
 	// If guest access is off, a guest can only do one of the very few following actions.
-	elseif (empty($modSettings['allow_guestAccess']) && $user_info['is_guest'] && (!isset($_REQUEST['action']) || !in_array($_REQUEST['action'], ['help', 'help_policy', 'reminder', 'activate', 'helpadmin', 'verificationcode', 'signup', 'signup2'])))
+	elseif (empty($modSettings['allow_guestAccess']) && $user_info['is_guest'] && (!isset($_REQUEST['action']) || !in_array($_REQUEST['action'], ['accessibility', 'help', 'help_policy', 'reminder', 'activate', 'helpadmin', 'verificationcode', 'signup', 'signup2'])))
 	{
 		$context['current_action'] = 'kick_guest';
 		return 'KickGuest';
@@ -221,6 +221,7 @@ function sbb_main()
 
 	// Here's the monstrous $_REQUEST['action'] array - $_REQUEST['action'] => array($file, $function).
 	$actionArray = [
+		'accessibility' => ['Accessibility.php', 'Accessibility'],
 		'activate' => ['Register.php', 'Activate'],
 		'admin' => ['Admin.php', 'AdminMain'],
 		'attachapprove' => ['ManageAttachments.php', 'ApproveAttach'],

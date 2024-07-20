@@ -24,6 +24,7 @@ function on_allowed_reagreement_actions(): bool
 	global $context;
 
 	$allowed_actions = [
+		'accessibility' => true,
 		'contact' => true,
 		'help' => true,
 		'profile' => [

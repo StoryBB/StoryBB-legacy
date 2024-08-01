@@ -133,10 +133,10 @@ function RemindPick()
 
 		require_once($sourcedir . '/Subs-Post.php');
 		$replacements = [
-			'REALNAME' => $row['real_name'],
+			'REALNAME' => un_htmlspecialchars($row['real_name']),
 			'REMINDLINK' => $scripturl . '?action=reminder;sa=setpassword;u=' . $row['id_member'] . ';code=' . $password,
 			'IP' => $user_info['ip'],
-			'MEMBERNAME' => $row['member_name'],
+			'MEMBERNAME' => un_htmlspecialchars($row['member_name']),
 		];
 
 		$emaildata = loadEmailTemplate('forgot_password', $replacements, empty($row['lngfile']) || empty($modSettings['userLanguage']) ? $language : $row['lngfile']);

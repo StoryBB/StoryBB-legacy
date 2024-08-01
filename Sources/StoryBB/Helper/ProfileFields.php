@@ -132,7 +132,7 @@ class ProfileFields
 					if (isset($_POST['bday1'], $_POST['bday2'], $_POST['bday3']))
 					{
 						// Make sure it's valid and if it is, handle it.
-						$value = checkdate($_POST['bday1'], $_POST['bday2'], $_POST['bday3'] < 1004 ? 1004 : $_POST['bday3']) ? sprintf('%04d-%02d-%02d', $_POST['bday3'] < 1004 ? 1004 : $_POST['bday3'], $_POST['bday1'], $_POST['bday2']) : '1004-01-01';
+						$value = checkdate((int) $_POST['bday1'], (int) $_POST['bday2'], (int) ($_POST['bday3'] < 1004 ? 1004 : $_POST['bday3'])) ? sprintf('%04d-%02d-%02d', $_POST['bday3'] < 1004 ? 1004 : $_POST['bday3'], $_POST['bday1'], $_POST['bday2']) : '1004-01-01';
 
 						// Also check if it's valid or not.
 						if (!empty($modSettings['minimum_age']) && !empty($modSettings['minimum_age_profile']) && $value != '1004-01-01')

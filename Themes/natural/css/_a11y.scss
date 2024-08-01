@@ -1,0 +1,22 @@
+#accessibility_menu {
+	color: $default-color;
+
+	.selector-theme {
+		margin-top: 10px;
+	}
+
+	button {
+		cursor: pointer;
+		border: 3px solid transparent;
+		background: transparent;
+		color: $tertiary-accent;
+		font-size: 3rem;
+		border-radius: 3px;
+	}
+}
+
+body:not(.light) {
+	#accessibility_menu .selector-theme button[value=dark] {
+		border-color: $tertiary-accent;
+	}
+}

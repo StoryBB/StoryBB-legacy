@@ -1,0 +1,22 @@
+<div id="accessibility_menu">
+	Color Mode
+
+	<div class="selector-theme">
+		<button type="button" value="light"><i class="far fa-sun"></i></button>
+		<button type="button" value="dark"><i class="fas fa-moon"></i></button>
+	</div>
+</div>
+
+<script>
+var themeSelectorButtons = document.querySelectorAll('#accessibility_menu .selector-theme button');
+for (var i = 0; i < themeSelectorButtons.length; i++) {
+	themeSelectorButtons[i].addEventListener('click', function(e) {
+		localStorage.setItem('theme', e.target.closest('button').value);
+		if (e.target.closest('button').value === 'light') {
+			document.querySelector('body').classList.add('light');
+		} else {
+			document.querySelector('body').classList.remove('light');
+		}
+	})
+}
+</script>

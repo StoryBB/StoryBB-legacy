@@ -1770,6 +1770,7 @@ function setupMenuContext()
 	{
 		addInlineJavaScript('
 	var user_menus = new smc_PopupMenu();
+	user_menus.add("a11y", "'. $scripturl . '?action=accessibility", false, true);
 	user_menus.add("alerts", "' . $scripturl . '?action=profile;area=alerts_popup;u='. $context['user']['id'] .'", false, true);
 	user_menus.add("characters", "' . $scripturl . '?action=profile;area=characters_popup", false, true);', true);
 		if ($context['allow_search'])

@@ -2121,14 +2121,14 @@ function Post2()
 	if (!empty($_REQUEST['msg']))
 	{
 		// Have admins allowed people to hide their screwups?
-		if (time() - $row['poster_time'] > $modSettings['edit_wait_time'] || $user_info['id'] != $row['id_member'])
+		if (time() - $existing_msg['poster_time'] > $modSettings['edit_wait_time'] || $user_info['id'] != $existing_msg['id_member'])
 		{
 			$msgOptions['modify_time'] = time();
 			$msgOptions['modify_name'] = $user_info['name'];
 			$msgOptions['modify_reason'] = $_POST['modify_reason'];
 		}
 
-		$msgOptions['edit_by_self'] = $user_info['id'] == $row['id_member'];
+		$msgOptions['edit_by_self'] = $user_info['id'] == $existing_msg['id_member'];
 
 		// This will save some time...
 		if (empty($approve_has_changed))

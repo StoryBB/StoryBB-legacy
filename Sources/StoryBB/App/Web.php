@@ -51,6 +51,10 @@ class Web
 
 		$global_config = App::get_global_config();
 
+		$container->inject('global_config', function() use ($global_config) {
+			return $global_config;
+		});
+
 		$container->inject('database', function() use ($container, $global_config) {
 			// Add in the port if needed
 			$db_options = [];

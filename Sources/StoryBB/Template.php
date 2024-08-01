@@ -318,8 +318,6 @@ class Template
 	{
 		global $context, $settings, $scripturl, $txt, $modSettings, $user_info, $options, $db_show_debug;
 
-		$context['session_flash'] = session_flash_retrieve();
-
 		$template_above = '';
 		$template_below = '';
 		if (!empty(self::$layers))
